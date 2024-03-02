@@ -15,7 +15,11 @@ cargo run --bin import_vocab
 
 7b. There are some strategies to employ. Google for translations from your learning language to your first language (or whatever known language you are using).
 
-## Other Strategies
+## Just enter data directly onto the database.
+```sql
+UPDATE palabras.translation_pair SET first_lang = 'place' WHERE id = 1;
+```
+## Other Importing Strategies
 
 1. Export your word pairs with missing first language translations.
 ```zsh
@@ -46,3 +50,4 @@ https://strommeninc.com/1000-most-common-spanish-words-frequency-vocabulary/
 https://github.com/mananoreboton/en-es-en-Dic/blob/master/src/main/resources/dic/es-en.xml
 
 4. Update [translations_config.json](../translations_config.json) to look for your translation files. Care must be taken to look for the correct columns.
+

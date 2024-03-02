@@ -36,7 +36,9 @@ echo "export PALABRA_DATABASE_URL='postgres://developer:************@0.0.0.0/pal
 _Note: Don't source the env files if you plan to switch between prod and testing. The command line shell's env vars will override
 the loaded .env file values._
 
-# For Integration Tested, repeat the previous steps with slight alterations:
+
+# Integration Testing
+Repeat the previous steps with slight alterations:
 
 ## Step 1: Gain admin access to your database.
 

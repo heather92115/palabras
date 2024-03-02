@@ -398,7 +398,7 @@ mod tests {
     }
 
     #[test]
-    fn test_fuzzy_pair_match() {
+    fn unit_test_fuzzy_pair_match() {
         let test_cases = vec![
             ("comprendimos", "", "comprendimos", 0),
             ("comprendimos", "", "", 10),
@@ -431,7 +431,7 @@ mod tests {
     }
 
     #[test]
-    fn test_calc_correctness() {
+    fn unit_test_calc_correctness() {
         let test_cases = vec![
             (0.5, 0, 0.83),
             (0.5, 2, 0.65),
@@ -460,7 +460,7 @@ mod tests {
     }
 
     #[test]
-    fn test_update_correctness() {
+    fn unit_test_update_correctness() {
         let previous_correctness = 0.75; // 75% correctness prior to the latest guess
         let distance_for_latest_guess = 2; // The guess was fairly close, but not perfect
 
@@ -486,7 +486,7 @@ mod tests {
     }
 
     #[test]
-    fn test_update_overall_progress() {
+    fn unit_test_update_overall_progress() {
         let progress_repo = Box::new(MockProgressStatsRepository);
         let pair_repo = Box::new(MockTranslationPairRepository);
         let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
@@ -502,7 +502,7 @@ mod tests {
     }
 
     #[test]
-    fn test_update_pair_stats() {
+    fn unit_test_update_pair_stats() {
         let pair_id = 1;
         let distance = 2; // The guess was close, but not perfect
 
@@ -522,7 +522,7 @@ mod tests {
     }
 
     #[test]
-    fn test_check_pair_match() {
+    fn unit_test_check_pair_match() {
         let progress_repo = Box::new(MockProgressStatsRepository);
         let pair_repo = Box::new(MockTranslationPairRepository);
         let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
