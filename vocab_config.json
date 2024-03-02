@@ -1,0 +1,5 @@
+{
+  "vocab_json_file_name": "data/vocab.json",
+  "plural_suffix": "s",
+  "non_verb_matching_suffixes": "o,a,os,as,e,es"
+}

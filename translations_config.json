@@ -1,0 +1,20 @@
+[
+  {
+    "file_name": "data/mananoreboton/short-es-en.xml",
+    "header_lines": 4,
+    "delimiter": "",
+    "learning_index": 0,
+    "first_index": 0,
+    "learning_regex": "<c>([^<]+)</c>",
+    "first_regex": "<d>([^<]+)</d>"
+  },
+  {
+    "file_name": "data/llm_import.csv",
+    "header_lines": 1,
+    "delimiter": ",",
+    "learning_index": 0,
+    "first_index": 1,
+    "learning_regex": null,
+    "first_regex": null
+  }
+]
