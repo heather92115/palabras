@@ -1,0 +1,925 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dic from="es" to="en">
+<l>
+    <w>
+        <c>añadidura</c>
+        <d>addition</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>añadidura</c>
+        <d>Something that is added, especially something that a merchant gives to a buyer to complete the amount requested, or something extra given as a bonus; a gratuity, lagniappe</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>añadir</c>
+        <d>to add</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>añadir</c>
+        <d>to augment</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>añal</c>
+        <d>alternative form of anual</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>aaleniano</c>
+        <d>Aalenian</d>
+        <t>{adj} [geology]</t>
+    </w>
+    <w>
+        <c>aaleniano</c>
+        <d>Aalenian</d>
+        <t>{m} [geology]</t>
+    </w>
+    <w>
+        <c>añares</c>
+        <d>eon (many years, a long period of time)</d>
+        <t>{mp} [Argentina, Colombia, Uruguay]</t>
+    </w>
+    <w>
+        <c>Aarón</c>
+        <d>male given name. Spanish equivalent of Aaron</d>
+        <t>{prop}</t>
+    </w>
+    <w>
+        <c>-aba</c>
+        <d>Suffix indicating the first-person singular imperfect indicative of -ar verbs</d>
+        <t>{suffix}</t>
+    </w>
+    <w>
+        <c>-aba</c>
+        <d>Suffix indicating the third-person singular imperfect indicative of -ar verbs</d>
+        <t>{suffix}</t>
+    </w>
+    <w>
+        <c>abañar</c>
+        <d>to sift</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>ababa</c>
+        <d>red poppy</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>Ababa</c>
+        <d>female given name</d>
+        <t>{prop}</t>
+    </w>
+    <w>
+        <c>ababillarse</c>
+        <d>to be sick with the stifle (of horses and other quadrupeds)</d>
+        <t>{v} [veterinary medicine, Chile, Mexico]</t>
+    </w>
+    <w>
+        <c>ababol</c>
+        <d>absentminded or simpleminded person</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>ababol</c>
+        <d>simpleton</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abacá</c>
+        <d>abaca</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abacalera</c>
+        <d>abaca worker (farmer, transporter, or salesman)</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abacalero</c>
+        <d>abaca worker (farmer, transporter, or salesman)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abacería</c>
+        <d>grocery (store)</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abacero</c>
+        <d>grocer</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abacial</c>
+        <d>abbatial</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abacista</c>
+        <d>abacist</d>
+        <t>{mf}</t>
+    </w>
+    <w>
+        <c>abacora</c>
+        <d>swordfish (Xiphias gladius)</d>
+        <t>{f} [Antilles]</t>
+    </w>
+    <w>
+        <c>abacorar</c>
+        <d>to stockpile, to hoard, to corner the market</d>
+        <t>{v} [Cuba]</t>
+    </w>
+    <w>
+        <c>abacorar</c>
+        <d>to attack</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abacorar</c>
+        <d>to catch, to surprise</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abacorar</c>
+        <d>to corner</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abacorar</c>
+        <d>to overcome</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abacorar</c>
+        <d>to pursue relentlessly, to harass</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abacorar</c>
+        <d>to smooch while dancing</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abad</c>
+        <d>abbot</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abadía</c>
+        <d>abbey</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abadejo</c>
+        <d>pollock, pollack (fish related to cod)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abadernar</c>
+        <d>to fasten with short ropes</d>
+        <t>{v} [nautical]</t>
+    </w>
+    <w>
+        <c>abadesa</c>
+        <d>abbess</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>Abadán</c>
+        <d>Abadan</d>
+        <t>{prop}</t>
+    </w>
+    <w>
+        <c>-abais</c>
+        <d>Suffix indicating the second-person plural imperfect indicative of -ar verbs</d>
+        <t>{suffix}</t>
+    </w>
+    <w>
+        <c>abajar</c>
+        <d>to descend</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abajar</c>
+        <d>to go down</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abajeño</c>
+        <d>coastal</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abajeño</c>
+        <d>lowlander</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abajo</c>
+        <d>down</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abajofirmante</c>
+        <d>undersigned, signatory</d>
+        <t>{mf}</t>
+    </w>
+    <w>
+        <c>abalanzar</c>
+        <d>to pounce on, swoop down on</d>
+        <t>{vr} [~se sobre]</t>
+    </w>
+    <w>
+        <c>abalanzar</c>
+        <d>to balance, compensate</d>
+        <t>{vt} [dated]</t>
+    </w>
+    <w>
+        <c>abalanzar</c>
+        <d>to propel</d>
+        <t>{vt}</t>
+    </w>
+    <w>
+        <c>abaldonadamente</c>
+        <d>daringly, courageously</d>
+        <t>{adv} [obsolete]</t>
+    </w>
+    <w>
+        <c>abalear</c>
+        <d>to shoot</d>
+        <t>{vt} [Latin America]</t>
+    </w>
+    <w>
+        <c>abalorio</c>
+        <d>glass beads</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abaluartar</c>
+        <d>to fortify with bastions</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abamperio</c>
+        <d>abampere</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>-aban</c>
+        <d>Suffix indicating the third-person plural imperfect indicative of -ar verbs</d>
+        <t>{suffix}</t>
+    </w>
+    <w>
+        <c>abanación</c>
+        <d>abannation, banishment</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abanar</c>
+        <d>to fan</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abancalar</c>
+        <d>To terrace</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abanderada</c>
+        <d>standard-bearer</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abanderado</c>
+        <d>standard-bearer</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abanderar</c>
+        <d>to lead a cause, rebellion, movement</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abanderar</c>
+        <d>to register a boat under a particular nationality</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abandonado</c>
+        <d>abandoned</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abandonado</c>
+        <d>dirty</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abandonar</c>
+        <d>to abandon</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abandonar</c>
+        <d>to leave</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abandono</c>
+        <d>abandonment</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abanicar</c>
+        <d>To fan</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abanico</c>
+        <d>fan (hand-held device)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abanico aluvial</c>
+        <d>alluvial fan</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abano</c>
+        <d>ceiling fan</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abano</c>
+        <d>fly chaser (tool to chase flies from an area)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>Abanto</c>
+        <d>A town in Zaragoza, Aragon, Spain</d>
+        <t>{prop}</t>
+    </w>
+    <w>
+        <c>Abanto</c>
+        <d>Spanish surname</d>
+        <t>{prop}</t>
+    </w>
+    <w>
+        <c>abaratamiento</c>
+        <d>reduction (generally in the price of an item)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abaratar</c>
+        <d>to make cheaper (by reducing the price)</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarca</c>
+        <d>sandal</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abarcar</c>
+        <d>to clasp</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarcar</c>
+        <d>to comprise, to make up, to contain, to include</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarcar</c>
+        <d>to embrace, to encompass</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarcar</c>
+        <d>to monopolize, to corner</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarcar</c>
+        <d>to take in</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarcar</c>
+        <d>to undertake, to embark upon</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarracar</c>
+        <d>to construct barracks</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarrar</c>
+        <d>to throw with force</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarraz</c>
+        <d>stavesacre (Delphinium staphisagria)</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abarrotar</c>
+        <d>to bar</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarrotar</c>
+        <d>to pack</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarrotar</c>
+        <d>to stow cargo on a ship</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abarrotería</c>
+        <d>hardware store</d>
+        <t>{f} [Central America]</t>
+    </w>
+    <w>
+        <c>abarrotería</c>
+        <d>general store, local shop</d>
+        <t>{f} [Mexico, Central America]</t>
+    </w>
+    <w>
+        <c>abartarse</c>
+        <d>to go down in price</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>-abas</c>
+        <d>Suffix indicating the second-person singular imperfect indicative of -ar verbs</d>
+        <t>{suffix}</t>
+    </w>
+    <w>
+        <c>abastar</c>
+        <d>to supply</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abastardar</c>
+        <d>To degrade, degenerate</d>
+        <t>{vi}</t>
+    </w>
+    <w>
+        <c>abastardar</c>
+        <d>To degrade, debase, bastardize</d>
+        <t>{vt}</t>
+    </w>
+    <w>
+        <c>abastecedor</c>
+        <d>outfitter</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abastecer</c>
+        <d>to supply (with)</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abastecimiento</c>
+        <d>supply</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abastionar</c>
+        <d>to fortify with bastions</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abasto</c>
+        <d>grocery</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abasto</c>
+        <d>supply</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abatanar</c>
+        <d>To beat, hit, abase</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abatanar</c>
+        <d>To full, mill (clothing)</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abatatar</c>
+        <d>To embarrass</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abatatar</c>
+        <d>To frighten</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abatidamente</c>
+        <d>abjectly</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abatido</c>
+        <d>abject, discouraged</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abatimiento</c>
+        <d>dejection</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abatimiento</c>
+        <d>depressiveness</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abatir</c>
+        <d>to demolish</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abatir</c>
+        <d>to discourage</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abatir</c>
+        <d>to humble</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abatirse</c>
+        <d>to become depressed</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abaya</c>
+        <d>abaya</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abciximab</c>
+        <d>abciximab</d>
+        <t>{m} [pharmaceutical drug]</t>
+    </w>
+    <w>
+        <c>Abdías</c>
+        <d>Obadiah</d>
+        <t>{prop} [biblical character]</t>
+    </w>
+    <w>
+        <c>abdicación</c>
+        <d>abdication, abandonment of a job or task</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abdicar</c>
+        <d>to abdicate, relinquish</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abdicativamente</c>
+        <d>abdicatingly</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abdicativo</c>
+        <d>abdicative</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abdomen</c>
+        <d></d>
+        <t>{m} [l/en, abdomen]</t>
+    </w>
+    <w>
+        <c>abdominal</c>
+        <d></d>
+        <t>{adj} [l/en, abdominal]</t>
+    </w>
+    <w>
+        <c>abdominal</c>
+        <d>sit-up</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abdominalmente</c>
+        <d>abdominally</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abdominoplastia</c>
+        <d>abdominoplasty</d>
+        <t>{f} [surgery]</t>
+    </w>
+    <w>
+        <c>abducción</c>
+        <d>abduction (physiology: movement separating limb from axis)</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abducir</c>
+        <d>to abduce, to abduct (draw away from the median axis of the body)</d>
+        <t>{v} [physiology, anatomy]</t>
+    </w>
+    <w>
+        <c>abductor</c>
+        <d>abductor</d>
+        <t>{m} [anatomy]</t>
+    </w>
+    <w>
+        <c>abductor del meñique</c>
+        <d>abductor minimi digiti</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abductor largo del pulgar</c>
+        <d>abductor pollicis longus</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abecé</c>
+        <d>ABCs (alphabet)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abecé</c>
+        <d>primer (textbook formerly used to teach the alphabet)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abecedario</c>
+        <d>alphabet (an ordered set of letters used in a language)</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abecedario</c>
+        <d>spelling book, primer</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abedul</c>
+        <d>birch</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abeja</c>
+        <d>bee (the insect)</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja albañila</c>
+        <d>mason bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja carpintera</c>
+        <d>carpenter bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja de miel</c>
+        <d>honeybee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja machiega</c>
+        <d>worker bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja maesa</c>
+        <d>queen bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja maestra</c>
+        <d>queen bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja neutra</c>
+        <d>worker bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja obrera</c>
+        <d>worker bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abeja reina</c>
+        <d>queen bee</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abejarrón</c>
+        <d>bumblebee</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abejaruco</c>
+        <d>bee-eater</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abejorro</c>
+        <d>bumblebee</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abejorro</c>
+        <d>cockchafer</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>Abel</c>
+        <d>Abel</d>
+        <t>{prop} [biblical character]</t>
+    </w>
+    <w>
+        <c>abeliano</c>
+        <d>abelian</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abemoladamente</c>
+        <d>sweetly</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abemolar</c>
+        <d>to soften, to lower the voice</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abenuz</c>
+        <d>ebony</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>aberración</c>
+        <d>aberration, aberrancy</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>aberrante</c>
+        <d>shocking, aberrant</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>aberrar</c>
+        <d>to be wrong, to err</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abertal</c>
+        <d>crackled, cracked</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abertura</c>
+        <d>opening</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abetal</c>
+        <d>an area planted with firs</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abetal</c>
+        <d>fir forest, wood</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abeto</c>
+        <d>fir</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abiertamente</c>
+        <d>openly, aboveboard</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abierto</c>
+        <d>open</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abigarradamente</c>
+        <d>In a motley manner</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abigarrado</c>
+        <d>pertaining to a mishmash of ill-sorted things</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abigarrado</c>
+        <d>variegated, colorful, pertaining to clashing colors</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abigarramiento</c>
+        <d>motley</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abigarrar</c>
+        <d>to paint in many colors, make colorful paints</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abigeato</c>
+        <d>abigeat, cattle-theft</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>Abimelech</c>
+        <d>(Biblical character)</d>
+        <t>{prop} [l/en, Abimelech]</t>
+    </w>
+    <w>
+        <c>abiogénesis</c>
+        <d>abiogenesis</d>
+        <t>{f}</t>
+    </w>
+    <w>
+        <c>abisal</c>
+        <d>abyssal (belonging to the ocean depths)</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>Abisinia</c>
+        <d>Abyssinia</d>
+        <t>{prop}</t>
+    </w>
+    <w>
+        <c>abisinio</c>
+        <d>Abyssinian</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abisinio</c>
+        <d>Abyssinian</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abismal</c>
+        <d>abysmal</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>abismalmente</c>
+        <d>abysmally</d>
+        <t>{adv}</t>
+    </w>
+    <w>
+        <c>abismarse</c>
+        <d>to engulf</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abismarse</c>
+        <d>to plunge into</d>
+        <t>{v}</t>
+    </w>
+    <w>
+        <c>abismo</c>
+        <d>abyss</d>
+        <t>{m}</t>
+    </w>
+    <w>
+        <c>abiótico</c>
+        <d>abiotic</d>
+        <t>{adj}</t>
+    </w>
+    <w>
+        <c>Abiyán</c>
+        <d>Abidjan (the largest city of Côte d'Ivoire)</d>
+        <t>{prop}</t>
+    </w>
+    <w>
+        <c>abjasia</c>
+        <d>feminine form of abjasio</d>
+        <t>{f}</t>
+    </w>
+</l>
+</dic>

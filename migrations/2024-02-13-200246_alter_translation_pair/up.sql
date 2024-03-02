@@ -1,0 +1,1 @@
+alter table translation_pair add column guesses INTEGER DEFAULT 0;
