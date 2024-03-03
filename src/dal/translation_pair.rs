@@ -94,10 +94,6 @@ pub trait TranslationPairRepository {
     /// This function performs a database query to select translation pairs based on their `percentage_correct` field,
     /// prioritizing pairs that need further study. Pairs already marked as fully known are excluded from the results.
     ///
-    /// # Parameters
-    ///
-    /// * `limit` - Specifies the maximum number of translation pairs to retrieve.
-    ///
     /// # Returns
     ///
     /// A `Result` containing either:
@@ -109,7 +105,7 @@ pub trait TranslationPairRepository {
     ///
     /// Returns an error if there's an issue executing the query, including connection problems
     /// or syntax errors in the query itself. The error is returned as a `String` describing the failure.
-    fn get_study_pairs(&self, limit: i64) -> Result<Vec<TranslationPair>, String>;
+    fn get_study_pairs(&self) -> Result<Vec<TranslationPair>, String>;
 
     /// Inserts a new `TranslationPair` record into the database.
     ///
@@ -230,9 +226,9 @@ impl TranslationPairRepository for DbTranslationPairRepository {
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn get_study_pairs(&self, limit: i64) -> Result<Vec<TranslationPair>, String> {
+    fn get_study_pairs(&self) -> Result<Vec<TranslationPair>, String> {
         let sql_text =
-            format!("select * from translation_pair where not fully_known and not too_easy and length(first_lang) > 0 order by percentage_correct desc limit {}", limit);
+            "select * from translation_pair where not fully_known and not too_easy and length(first_lang) > 0 order by percentage_correct desc".to_string();
 
         let mut conn = get_connection();
         let pairs = sql_query(sql_text)

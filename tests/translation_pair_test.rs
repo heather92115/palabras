@@ -183,7 +183,7 @@ fn test_get_study_pairs() {
     }
 
     let study_list = repo
-        .get_study_pairs(num_records)
+        .get_study_pairs()
         .expect("Should have gotten some study pairs");
     assert!(
         study_list.len() >= num_records as usize,
@@ -200,15 +200,7 @@ pub fn test_new_translation_pair_instance() -> NewTranslationPair {
         learning_lang,
         first_lang,
         percentage_correct: Some(0.45),
-        created: chrono::Utc::now(),
-        last_tested: None,
-        fully_known: false,
-        guesses: None,
-        alternatives: None,
         skill: Some(INTEGRATION_TEST_SKILL.to_string()),
-        too_easy: false,
-        infinitive: None,
-        pos: None,
-        direction: None,
+        ..Default::default()
     }
 }

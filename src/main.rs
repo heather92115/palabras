@@ -16,7 +16,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let pairs = match_service.get_study_pairs(12)?;
     for pair in pairs {
         println!();
-        println!("Translate: '{}':", &pair.first_lang);
+        if pair.hint.is_some() && !pair.hint.clone().unwrap_or_default().is_empty() {
+            println!("Translate: '{}'   hint: {}':", &pair.first_lang, &pair.hint.unwrap_or_default());
+        }
+        else {
+            println!("Translate: '{}':", &pair.first_lang);
+        }
         io::stdout().flush().unwrap(); // Ensure the prompt is displayed before reading input
         let mut guess = String::new(); // Create a mutable variable to store the input
 

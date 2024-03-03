@@ -20,7 +20,7 @@ pub struct TranslationPair {
     pub too_easy: bool,        // Pair is too easy and never presented to the user.
     pub infinitive: Option<String>, // If the word is a verb, the infinitive form, otherwise none.
     pub pos: Option<String>, // Part of Speech, used to decide how to handle imports of first language.
-    pub direction: Option<String>, // Direction of learning from en to es for instance.
+    pub hint: Option<String>, // Hint to be displayed to help user translate words.
 }
 
 impl Default for TranslationPair {
@@ -39,7 +39,7 @@ impl Default for TranslationPair {
             too_easy: Default::default(),      // Defaults to false for bool
             infinitive: Default::default(),    // Defaults to ""
             pos: Default::default(),           // Defaults to ""
-            direction: Default::default(),     // Defaults to ""
+            hint: Default::default(),          // Defaults to ""
         }
     }
 }
@@ -60,7 +60,7 @@ pub struct NewTranslationPair {
     pub too_easy: bool,        // Pair is too easy and never presented to the user.
     pub infinitive: Option<String>, // If the word is a verb, the infinitive form, otherwise none.
     pub pos: Option<String>, // Part of Speech, used to decide how to handle imports of first language.
-    pub direction: Option<String>, // Direction of learning from en to es for instance.
+    pub hint: Option<String>, // Hint to be displayed to help user translate words.
 }
 
 impl Default for NewTranslationPair {
@@ -78,7 +78,7 @@ impl Default for NewTranslationPair {
             too_easy: Default::default(),      // Defaults to false for bool
             infinitive: Default::default(),    // Defaults to ""
             pos: Default::default(),           // Defaults to ""
-            direction: Default::default(),     // Defaults to ""
+            hint: Default::default(),          // Defaults to ""
         }
     }
 }

@@ -149,7 +149,19 @@ impl LearnTranslationPairsFuzzyMatch {
 /// correctness.
 impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
     fn get_study_pairs(&self, limit: i64) -> Result<Vec<TranslationPair>, String> {
-        self.pair_repo.get_study_pairs(limit)
+        let mut full_list = self.pair_repo.get_study_pairs()?;
+        full_list = full_list.into_iter().filter(|l| l.last_tested.is_some() ).collect();
+        full_list.truncate(limit as usize);
+        full_list.sort_by(|a, b| b.last_tested.clone().unwrap_or_default().cmp(&a.last_tested.clone().unwrap_or_default()));
+
+        if full_list.len() < limit as usize {
+            let mut additional = self.pair_repo.get_study_pairs()?;
+            additional = additional.into_iter().filter(|l| l.last_tested.is_none() ).collect();
+            additional.truncate(limit as usize - full_list.len());
+            full_list.append(&mut additional);
+        }
+
+        Ok(full_list)
     }
 
     /// Implementation, see trait for details [`LearnTranslationPairs::check_pair_match`]
@@ -363,7 +375,7 @@ mod tests {
             Ok(vec![])
         }
 
-        fn get_study_pairs(&self, limit: i64) -> Result<Vec<TranslationPair>, String> {
+        fn get_study_pairs(&self) -> Result<Vec<TranslationPair>, String> {
             // Mock behavior: Return a Vec with a limited number of dummy TranslationPairs
             Ok(vec![
                 TranslationPair {
@@ -372,8 +384,7 @@ mod tests {
                     first_lang: "Study first language".to_string(),
                     percentage_correct: Some(0.5),
                     ..Default::default()
-                };
-                limit as usize
+                }
             ])
         }
 

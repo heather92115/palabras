@@ -35,7 +35,7 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn get_database_url() -> String {
-    env::var("PALABRA_DATABASE_URL").expect("PALABRA_DATABASE_URL must be set")
+    env::var("DATABASE_URL").expect("DATABASE_URL must be set")
 }
 
 lazy_static! {

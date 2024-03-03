@@ -27,9 +27,12 @@ pub mod palabras {
             too_easy -> Bool,
             infinitive -> Nullable<Varchar>,
             pos -> Nullable<Varchar>,
-            direction -> Nullable<Varchar>,
+            hint -> Nullable<Varchar>,
         }
     }
 
-    diesel::allow_tables_to_appear_in_same_query!(progress_stats, translation_pair,);
+    diesel::allow_tables_to_appear_in_same_query!(
+        progress_stats,
+        translation_pair,
+    );
 }

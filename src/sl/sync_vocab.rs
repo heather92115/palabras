@@ -244,6 +244,10 @@ pub fn merge(
                    &vocab_config.plural_suffix.clone().unwrap_or_default(),
     );
 
+    // Add a hint if multiple words are found.
+    let word_cnt = current.learning_lang.split_whitespace().count();
+    current.hint = if word_cnt > 1 { Some(format!("{} words", word_cnt).to_string()) } else { None };
+
     // Update the translation back to the first language if it wasn't already translated
     if current.first_lang.clone().is_empty() {
         current.first_lang = first;
@@ -309,16 +313,19 @@ pub fn merge(
 pub fn create(item: &VocabOverview, first: String) -> Result<(), String> {
     // Get the dal repo for translation pairs. It requires a database connection.
     let pair_repo = DbTranslationPairRepository;
+    let learning_lang = item.word_string.clone();
+    let word_cnt = learning_lang.split_whitespace().count();
 
     let new_translation_pair = NewTranslationPair {
         first_lang: first,
-        learning_lang: item.word_string.clone(),
+        learning_lang,
         percentage_correct: Some(item.strength.clone()),
         fully_known: item.strength > FULLY_KNOWN_THRESHOLD,
         too_easy: item.strength > TOO_EASY_THRESHOLD,
         skill: Some(item.skill.clone()),
         infinitive: Some(item.infinitive.clone().unwrap_or_default()),
         pos: Some(item.pos.clone().unwrap_or_default()),
+        hint: if word_cnt > 1 { Some(format!("{} words", word_cnt).to_string()) } else { None },
         // Other fields use their default values
         ..Default::default()
     };
