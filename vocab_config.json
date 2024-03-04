@@ -1,5 +1,43 @@
 {
   "vocab_json_file_name": "data/vocab.json",
   "plural_suffix": "s",
-  "non_verb_matching_suffixes": "o,a,os,as,e,es"
+  "non_verb_matching_suffixes": "o,a,os,as,e,es",
+  "pronouns": [
+    {
+      "name": "subject pronoun",
+      "instances": "yo, tú, él, ella, nosotros, nosotras, vosotros, vosotras, ellos, ellas"
+    },
+    {
+      "name": "formal subject pronoun",
+      "instances": "usted, ustedes"
+    },
+    {
+      "name": "reflexive pronoun",
+      "instances": "me, te, se, nos, os"
+    },
+    {
+      "name": "object pronoun",
+      "instances": "lo, la, los, las, le, nos, les"
+    },
+    {
+      "name": "possessive pronoun",
+      "instances": "mío, mía, míos, mías, tuyo, tuya, tuyos, tuyas, suyo, suya, suyos, suyas, nuestro, nuestra, nuestros, nuestras, vuestro, vuestra, vuestros, vuestras"
+    },
+    {
+      "name": "demonstrative pronoun",
+      "instances": "este, esta, estos, estas, ese, esa, esos, esas, aquel, aquella, aquellos, aquellas"
+    },
+    {
+      "name": "relative pronoun",
+      "instances": "que, quien, quienes, cuyo, cuya, cuyos, cuyas, lo que"
+    },
+    {
+      "name": "interrogative pronoun",
+      "instances": "quién, quienes, qué, cuál, cuáles, cuánto, cuánta, cuántos, cuántas"
+    },
+    {
+      "name": "indefinite pronoun",
+      "instances": "alguien, nadie, algo, nada, cada uno, varios, varias"
+    }
+  ]
 }

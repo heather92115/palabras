@@ -28,6 +28,7 @@ pub mod palabras {
             infinitive -> Nullable<Varchar>,
             pos -> Nullable<Varchar>,
             hint -> Nullable<Varchar>,
+            user_notes -> Nullable<Varchar>,
         }
     }
 

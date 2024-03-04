@@ -21,6 +21,7 @@ pub struct TranslationPair {
     pub infinitive: Option<String>, // If the word is a verb, the infinitive form, otherwise none.
     pub pos: Option<String>, // Part of Speech, used to decide how to handle imports of first language.
     pub hint: Option<String>, // Hint to be displayed to help user translate words.
+    pub user_notes: Option<String>, // Hint supplied by user to be displayed to help user translate words.
 }
 
 impl Default for TranslationPair {
@@ -40,6 +41,7 @@ impl Default for TranslationPair {
             infinitive: Default::default(),    // Defaults to ""
             pos: Default::default(),           // Defaults to ""
             hint: Default::default(),          // Defaults to ""
+            user_notes: Default::default(),   // Defaults to ""
         }
     }
 }
@@ -61,6 +63,7 @@ pub struct NewTranslationPair {
     pub infinitive: Option<String>, // If the word is a verb, the infinitive form, otherwise none.
     pub pos: Option<String>, // Part of Speech, used to decide how to handle imports of first language.
     pub hint: Option<String>, // Hint to be displayed to help user translate words.
+    pub user_notes: Option<String>, // Hint supplied by user to be displayed to help user translate words.
 }
 
 impl Default for NewTranslationPair {
@@ -79,6 +82,7 @@ impl Default for NewTranslationPair {
             infinitive: Default::default(),    // Defaults to ""
             pos: Default::default(),           // Defaults to ""
             hint: Default::default(),          // Defaults to ""
+            user_notes: Default::default(),   // Defaults to ""
         }
     }
 }

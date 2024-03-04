@@ -1,4 +1,4 @@
-use crate::config::{VocabConfig, TranslationsConfig};
+use crate::config::{TranslationsConfig, VocabConfig};
 use crate::dal::file_access::{
     find_first_lang_translations, load_buffer_from_file, write_missing_first_export,
 };
@@ -124,6 +124,67 @@ pub fn load_vocab_from_json(json_file_name: &str) -> Result<LanguageData, String
     Ok(vocab_overview)
 }
 
+/// Determines hints for a given phrase by analyzing its length and the presence of specific pronouns.
+///
+/// This function splits the input phrase into words, counts them, and searches for any specified pronouns
+/// within the phrase. If the phrase contains more than one word, it returns a hint consisting of the word count
+/// and the names of any pronoun categories found. This can help identify the grammatical structure or complexity
+/// of the phrase.
+///
+/// # Parameters
+/// - `vocab_config: &VocabConfig` - Configuration containing pronoun information.
+/// - `learning: &str` - The learning phrase to be analyzed.
+///
+/// # Returns
+/// An `Option<String>` that contains a hint if the phrase has more than one word. The hint includes the word count
+/// and names of any matching pronoun categories found in the phrase. Returns `None` if the phrase consists of a single word.
+///
+/// # Examples
+/// ```
+///
+/// use palabras::config::{Pronoun, VocabConfig};
+/// use palabras::sl::sync_vocab::determine_hint;
+///
+/// let vocab_config = VocabConfig {
+///     vocab_json_file_name: "data/vocab.json".to_string(),
+///     plural_suffix: Some("s".to_string()),
+///     non_verb_matching_suffixes: Some("o,a,os,as,e,es".to_string()),
+///     pronouns: Some(vec![
+///         Pronoun {
+///             name: "reflexive pronoun".to_string(),
+///             instances: "me, te, se, nos, os".to_string(),
+///         },
+///         // Additional pronouns not shown for brevity
+///     ]),
+/// };
+///
+/// let learning_phrase = "se acuerdan";
+/// let hint = determine_hint(&vocab_config, &learning_phrase).unwrap();
+/// assert_eq!(hint, "2, reflexive pronoun");
+/// ```
+/// This example demonstrates how `determine_hint` generates a hint for the phrase "tú y yo", indicating that it contains
+/// two words and matches the "subject pronoun" category.
+pub fn determine_hint(vocab_config: &VocabConfig, learning: &str) -> Option<String> {
+    let binding = learning.to_lowercase();
+    let words: Vec<&str> = binding.split_whitespace().collect();
+
+    if words.len() > 1 {
+        let mut hint = words.len().to_string();
+
+        if let Some(pronouns) = &vocab_config.pronouns {
+            for pronoun in pronouns {
+                for instance in pronoun.instances.split(", ") {
+                    if words.contains(&instance) {
+                        hint = format!("{}, {}", hint, pronoun.name);
+                    }
+                }
+            }
+        }
+        return Some(hint);
+    }
+    None
+}
+
 /// Merges additional learning material into the current translation pair.
 ///
 /// This function updates the `current` translation pair by potentially swapping its
@@ -162,10 +223,10 @@ pub fn merge_learning(
     additional_learning: String,
     plural_suffix: &str,
 ) {
-
     if current.learning_lang.ne(&additional_learning) {
         // See if the learning lang is in plural form and should be swapped with the new word.
-        let (learning, additional) = if current.learning_lang
+        let (learning, additional) = if current
+            .learning_lang
             .strip_suffix(plural_suffix)
             .unwrap_or_default()
             .eq(&additional_learning)
@@ -211,7 +272,9 @@ pub fn merge_learning(
 /// let vocab_config = VocabConfig {
 ///     vocab_json_file_name: "".to_string(),
 ///     plural_suffix: Some("s".to_string()),
-///     non_verb_matching_suffixes: None,};
+///     non_verb_matching_suffixes: None,
+///     pronouns: None
+/// };
 ///
 /// let mut translation_pair = TranslationPair {
 ///     learning_lang: "gato".to_string(),
@@ -237,16 +300,15 @@ pub fn merge(
     item: &VocabOverview,
     first: String,
 ) {
-
     // Determine placement of new learning word or phrase
-    merge_learning(current,
-                   item.word_string.clone(),
-                   &vocab_config.plural_suffix.clone().unwrap_or_default(),
+    merge_learning(
+        current,
+        item.word_string.clone(),
+        &vocab_config.plural_suffix.clone().unwrap_or_default(),
     );
 
-    // Add a hint if multiple words are found.
-    let word_cnt = current.learning_lang.split_whitespace().count();
-    current.hint = if word_cnt > 1 { Some(format!("{} words", word_cnt).to_string()) } else { None };
+    // See if help will be needed to determine the correct learning lang
+    current.hint = determine_hint(vocab_config, &current.learning_lang);
 
     // Update the translation back to the first language if it wasn't already translated
     if current.first_lang.clone().is_empty() {
@@ -273,6 +335,7 @@ pub fn merge(
 ///
 /// # Arguments
 ///
+/// * `vocab_config` - A reference to the configuration settings for vocabulary handling, including pluralization rules. Settings are found at `vocab_config.json`
 /// * `item` - A reference to a `VocabOverview` instance containing data for the learning language side
 /// of the translation pair.
 /// * `first` - A `String` representing the translation of the item in the first language.
@@ -310,11 +373,15 @@ pub fn merge(
 ///     Err(e) => println!("Failed to create translation pair: {}", e),
 /// }
 /// ```
-pub fn create(item: &VocabOverview, first: String) -> Result<(), String> {
+pub fn create(
+    vocab_config: &VocabConfig,
+    item: &VocabOverview,
+    first: String,
+) -> Result<(), String> {
     // Get the dal repo for translation pairs. It requires a database connection.
     let pair_repo = DbTranslationPairRepository;
     let learning_lang = item.word_string.clone();
-    let word_cnt = learning_lang.split_whitespace().count();
+    let hint = determine_hint(vocab_config, &learning_lang);
 
     let new_translation_pair = NewTranslationPair {
         first_lang: first,
@@ -325,7 +392,7 @@ pub fn create(item: &VocabOverview, first: String) -> Result<(), String> {
         skill: Some(item.skill.clone()),
         infinitive: Some(item.infinitive.clone().unwrap_or_default()),
         pos: Some(item.pos.clone().unwrap_or_default()),
-        hint: if word_cnt > 1 { Some(format!("{} words", word_cnt).to_string()) } else { None },
+        hint,
         // Other fields use their default values
         ..Default::default()
     };
@@ -409,8 +476,9 @@ fn find_similar(
             }
 
             // Construct the alternative word by replacing the original suffix with the alternative suffix.
-            if let Some(stem) = learning.strip_suffix(ori_suffix) {  // ex: gato becomes gat
-                let alt_word = format!("{}{}", stem, alt_suffix);  // ex: gat becomes gata, gatos, gatas
+            if let Some(stem) = learning.strip_suffix(ori_suffix) {
+                // ex: gato becomes gat
+                let alt_word = format!("{}{}", stem, alt_suffix); // ex: gat becomes gata, gatos, gatas
 
                 // Attempt to search for a translation pair using the newly contructed alternative
                 if let Ok(Some(translation_pair)) =
@@ -583,10 +651,11 @@ fn process_duo_vocab(
         match find_translation_pair(vocab_config, item) {
             Ok(Some(mut current)) => {
                 merge(vocab_config, &mut current, item, translated_first);
-                pair_repo.update_translation_pair(current)
-                        .map_err(|err| err.to_string())?;
+                pair_repo
+                    .update_translation_pair(current)
+                    .map_err(|err| err.to_string())?;
             }
-            Ok(None) => create(item, translated_first)?,
+            Ok(None) => create(vocab_config, item, translated_first)?,
             Err(e) => return Err(e.to_string()),
         }
     }
@@ -776,4 +845,85 @@ pub fn export_missing_first_lang_pairs(file_path: &str) -> Result<(), Box<dyn Er
     write_missing_first_export(file_path, pairs)?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::config::{Pronoun, VocabConfig};
+    use crate::sl::sync_vocab::determine_hint;
+
+    #[derive(Debug)]
+    struct HintTestCase {
+        learning_phrase: &'static str,
+        expected_hint: &'static str,
+    }
+
+    #[test]
+    fn unit_test_determine_hint() {
+        let vocab_config = VocabConfig {
+            vocab_json_file_name: "data/vocab.json".to_string(),
+            plural_suffix: Some("s".to_string()),
+            non_verb_matching_suffixes: Some("o,a,os,as,e,es".to_string()),
+            pronouns: Some(vec![
+                Pronoun {
+                    name: "subject pronoun".to_string(),
+                    instances:
+                        "yo, tú, él, ella, nosotros, nosotras, vosotros, vosotras, ellos, ellas"
+                            .to_string(),
+                },
+                Pronoun {
+                    name: "formal subject pronoun".to_string(),
+                    instances: "usted, ustedes".to_string(),
+                },
+                Pronoun {
+                    name: "reflexive pronoun".to_string(),
+                    instances: "me, te, se, nos, os".to_string(),
+                },
+                Pronoun {
+                    name: "object pronoun".to_string(),
+                    instances: "lo, la, los, las, le, nos, os, les".to_string(),
+                },
+            ]),
+        };
+
+        let test_cases = vec![
+            HintTestCase {
+                learning_phrase: "usted hace",
+                expected_hint: "2, formal subject pronoun",
+            },
+            HintTestCase {
+                learning_phrase: "yo corro",
+                expected_hint: "2, subject pronoun",
+            },
+            HintTestCase {
+                learning_phrase: "ellos juegan en el parque",
+                expected_hint: "5, subject pronoun",
+            },
+            HintTestCase {
+                learning_phrase: "cómo se dice",
+                expected_hint: "3, reflexive pronoun",
+            },
+            HintTestCase {
+                learning_phrase: "fáciles",
+                expected_hint: "",
+            },
+            HintTestCase {
+                learning_phrase: "especial del día",
+                expected_hint: "3",
+            },
+            HintTestCase {
+                learning_phrase: "no lo sé",
+                expected_hint: "3, object pronoun",
+            },
+        ];
+
+        for test_case in test_cases {
+            let hint = determine_hint(&vocab_config, test_case.learning_phrase).unwrap_or_default();
+            assert_eq!(
+                hint, test_case.expected_hint,
+                "Failed on learning_phrase: {:?}",
+                test_case.learning_phrase
+            );
+        }
+    }
 }

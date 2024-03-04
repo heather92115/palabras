@@ -22,6 +22,7 @@ use serde::Deserialize;
 ///     vocab_json_file_name: "vocab.json".to_string(),
 ///     plural_suffix: Some("s".to_string()),
 ///     non_verb_matching_suffixes: Some("o,a,os,as,e,es".to_string()),
+///     pronouns: None
 /// };
 ///
 /// // This config will not combine similar words
@@ -29,6 +30,7 @@ use serde::Deserialize;
 ///     vocab_json_file_name: "vocab.json".to_string(),
 ///     plural_suffix: None,
 ///     non_verb_matching_suffixes: None,
+///     pronouns: None
 /// };
 /// ```
 ///
@@ -37,10 +39,17 @@ use serde::Deserialize;
 /// configurations for handling plural forms and non-verb word suffixes.
 
 #[derive(Deserialize)]
+pub struct Pronoun {
+    pub name: String,
+    pub instances: String
+}
+
+#[derive(Deserialize)]
 pub struct VocabConfig {
     pub vocab_json_file_name: String,
     pub plural_suffix: Option<String>,
     pub non_verb_matching_suffixes: Option<String>,
+    pub pronouns: Option<Vec<Pronoun>>
 }
 
 static VOCAB_CONFIG_FILENAME: &str = "vocab_config.json";

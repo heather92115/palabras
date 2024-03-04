@@ -113,6 +113,25 @@ pub trait LearnTranslationPairs {
     /// correctness taking into account the latest guess and applying a heavier weight to perfect
     /// matches.
     fn calc_correctness(&self, previous: f64, distance: usize) -> f64;
+
+    /// Constructs a translation prompt string for a given translation pair.
+    ///
+    /// This function generates a prompt string to display to the user, based on the provided
+    /// `TranslationPair`. The basic prompt format includes the phrase "Translate: 'first_lang'",
+    /// where `first_lang` is replaced with the `first_lang` field of the `TranslationPair`.
+    ///
+    /// If the `TranslationPair` has a non-empty `hint` field, the hint is appended to the prompt
+    /// with the format "hint: hint_value". Similarly, if the `TranslationPair` has a non-empty
+    /// `pos` (part of speech) field, it is appended with the format "pos: pos_value".
+    ///
+    /// # Arguments
+    ///
+    /// * `pair` - A `TranslationPair` instance containing the data to construct the prompt.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `String` representing the constructed prompt for translation.
+    fn determine_prompt(&self, pair: TranslationPair) -> String;
 }
 
 pub struct LearnTranslationPairsFuzzyMatch {
@@ -149,19 +168,24 @@ impl LearnTranslationPairsFuzzyMatch {
 /// correctness.
 impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
     fn get_study_pairs(&self, limit: i64) -> Result<Vec<TranslationPair>, String> {
-        let mut full_list = self.pair_repo.get_study_pairs()?;
-        full_list = full_list.into_iter().filter(|l| l.last_tested.is_some() ).collect();
-        full_list.truncate(limit as usize);
-        full_list.sort_by(|a, b| b.last_tested.clone().unwrap_or_default().cmp(&a.last_tested.clone().unwrap_or_default()));
+        let study_pairs = self.pair_repo.get_study_pairs()?;
 
-        if full_list.len() < limit as usize {
-            let mut additional = self.pair_repo.get_study_pairs()?;
-            additional = additional.into_iter().filter(|l| l.last_tested.is_none() ).collect();
-            additional.truncate(limit as usize - full_list.len());
-            full_list.append(&mut additional);
+        // Separate pairs into those that have been tested and those that have not.
+        let (mut study_list, not_tested): (Vec<_>, Vec<_>) = study_pairs.into_iter()
+            .partition(|l| l.last_tested.is_some());
+
+        // Now sort the list by last_tested in ascending order giving a little time before presenting
+        // the last studied pair.
+        study_list.sort_by(|a, b| {
+            a.last_tested.clone().unwrap_or_default().cmp(&b.last_tested.clone().unwrap_or_default())
+        });
+
+        // Grab more pairs if the user has finished learning the already tested pairs.
+        if study_list.len() < limit as usize {
+            study_list.extend(not_tested.into_iter().take(limit as usize - study_list.len()));
         }
 
-        Ok(full_list)
+        Ok(study_list)
     }
 
     /// Implementation, see trait for details [`LearnTranslationPairs::check_pair_match`]
@@ -250,46 +274,28 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
             .get_progress_stats_by_id(PROGRESS_STATS_ID)
             .map_err(|err| err.to_string())?;
 
-        let calc_num_correct = if correct {
-            current.num_correct.unwrap_or_else(|| 0) + 1
-        } else {
-            current.num_correct.unwrap_or_else(|| 0)
-        };
-
-        let calc_num_incorrect = if !correct {
-            current.num_incorrect.unwrap_or_else(|| 0) + 1
-        } else {
-            current.num_incorrect.unwrap_or_else(|| 0)
-        };
-
-        assert!(
-            calc_num_correct + calc_num_incorrect > 0,
-            "At least of these is guaranteed to be non zero"
+        // Increment counters based on whether the answer was correct
+        let (num_correct, num_incorrect) = (
+            current.num_correct.unwrap_or(0) + correct as i32,
+            current.num_incorrect.unwrap_or(0) + (!correct) as i32,
         );
-        let calc_total_percentage =
-            calc_num_correct as f64 / (calc_num_correct + calc_num_incorrect) as f64;
 
+        // Calculate the total percentage
+        let total_percentage = num_correct as f64 / (num_correct + num_incorrect) as f64;
+
+        // Prepare the updated stats
         let updating = ProgressStats {
-            num_known: if last_fully_known {
-                Some(current.num_known.unwrap_or_else(|| 0) + 1)
-            } else {
-                current.num_known
-            },
-            num_correct: Some(calc_num_correct),
-            num_incorrect: Some(calc_num_incorrect),
-            total_percentage: Some(calc_total_percentage),
+            num_known: if last_fully_known { Some(current.num_known.unwrap_or(0) + 1) } else { current.num_known },
+            num_correct: Some(num_correct),
+            num_incorrect: Some(num_incorrect),
+            total_percentage: Some(total_percentage),
             updated: Utc::now(),
             ..current
         };
 
-        self.process_repo
-            .update_progress_stats(updating)
-            .map_err(|err| err.to_string())?;
-        let updated = self
-            .process_repo
-            .get_progress_stats_by_id(PROGRESS_STATS_ID)
-            .map_err(|err| err.to_string())?;
-        Ok(updated)
+        // Update the stats and return the updated record
+        self.process_repo.update_progress_stats(updating).map_err(|err| err.to_string())?;
+        self.process_repo.get_progress_stats_by_id(PROGRESS_STATS_ID).map_err(|err| err.to_string())
     }
 
     /// Implementation, see trait for details [`LearnTranslationPairs::calc_correctness`]
@@ -306,6 +312,27 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
         }
 
         score
+    }
+
+    /// Implementation, see trait for details [`LearnTranslationPairs::determine_prompt`]
+    ///
+    /// For advanced usage and mock implementations, please refer to
+    /// the unit tests in this module.
+    fn determine_prompt(&self, pair: TranslationPair) -> String {
+        let mut prompt = format!("Translate: '{}'",  &pair.first_lang);
+        if !pair.hint.clone().unwrap_or_default().is_empty() {
+            prompt =  format!("{}    hint: {}",  prompt, &pair.hint.unwrap_or_default());
+        }
+
+        if !pair.pos.clone().unwrap_or_default().is_empty() {
+            prompt =  format!("{}    pos: {}",  prompt, &pair.pos.unwrap_or_default());
+        }
+
+        if !pair.user_notes.clone().unwrap_or_default().is_empty() {
+            prompt =  format!("{}    your notes: {}",  prompt, &pair.user_notes.unwrap_or_default());
+        }
+
+        prompt
     }
 }
 
@@ -566,5 +593,70 @@ mod tests {
             distance_for_no_similarity, MAX_DISTANCE,
             "A guess with no similarity should return the maximum distance."
         );
+    }
+
+    #[test]
+    fn unit_test_determine_prompt() {
+        let progress_repo = Box::new(MockProgressStatsRepository);
+        let pair_repo = Box::new(MockTranslationPairRepository);
+        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
+            progress_repo,
+            pair_repo,
+        ));
+
+        // Define test cases
+        let test_cases = vec![
+            (
+                TranslationPair {
+                    first_lang: "amor".to_string(),
+                    hint: Some("noun".to_string()),
+                    pos: Some("love".to_string()),
+                    ..Default::default()
+                },
+                "Translate: 'amor'    hint: noun    pos: love".to_string(),
+            ),
+            (
+                TranslationPair {
+                    first_lang: "correr".to_string(),
+                    hint: None,
+                    pos: Some("verb".to_string()),
+                    ..Default::default()
+                },
+                "Translate: 'correr'    pos: verb".to_string(),
+            ),
+            (
+                TranslationPair {
+                    first_lang: "amarillo".to_string(),
+                    hint: Some("color".to_string()),
+                    pos: None,
+                    ..Default::default()
+                },
+                "Translate: 'amarillo'    hint: color".to_string(),
+            ),
+            (
+                TranslationPair {
+                    first_lang: "libro".to_string(),
+                    hint: None,
+                    pos: None,
+                    ..Default::default()
+                },
+                "Translate: 'libro'".to_string(),
+            ),
+            (
+                TranslationPair {
+                    first_lang: "libro".to_string(),
+                    user_notes: Some("something you read".to_string()),
+                    ..Default::default()
+                },
+                "Translate: 'libro'    your notes: something you read".to_string(),
+            ),
+        ];
+
+        // Run test cases
+        for (pair, expected_prompt) in test_cases {
+            let prompt = fuzzy_service.determine_prompt(pair);
+            assert_eq!(prompt, expected_prompt, "Prompt did not match expected value for TranslationPair");
+        }
+
     }
 }
