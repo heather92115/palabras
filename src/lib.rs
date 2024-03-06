@@ -3,4 +3,3 @@ pub mod dal;
 pub mod models;
 pub mod schema;
 pub mod sl;
-pub mod gui;
