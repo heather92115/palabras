@@ -13,6 +13,7 @@ diesel = { version = "2.1.4", features = ["postgres", "r2d2", "chrono", "serde_j
 diesel_migrations = "2.1.0"
 dotenv = "0.15.0"
 html-entities = "0.1.0-1"
+iced = { version = "0.12.1", features = ["default", "system", "advanced"] }
 lazy_static = { version = "1.4.0" }
 rand = "0.9.0-alpha.0"
 regex = "1.10.3"
@@ -21,3 +22,29 @@ serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
 strsim = "0.11.0"
 tokio = { version = "1.36.0", features = ["full", "test-util"] }
+tracing-subscriber = "0.3.18"
+
+[target.'cfg(target_family = "windows")'.dependencies]
+dwrote = { version = "0.11.0", default-features = false }
+
+[target.'cfg(target_family = "windows")'.dependencies.winapi]
+version = "0.3.9"
+features = ["dwrite", "minwindef", "sysinfoapi", "winbase", "winnt"]
+
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
+core-foundation = "0.9.4"
+core-graphics = "0.23.1"
+core-text = "20.1.0"
+
+[target.'cfg(not(any(target_family = "windows", target_os = "macos", target_os = "ios")))'.dependencies]
+freetype = "0.7.1"
+
+[target.'cfg(not(any(target_family = "windows", target_os = "macos", target_os = "ios", target_arch = "wasm32")))'.dependencies]
+yeslogic-fontconfig-sys = "5.0.0"
+
+[target.'cfg(not(any(target_arch = "wasm32", target_family = "windows", target_os = "android")))'.dependencies]
+dirs-next = "2.0.0"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+walkdir = "2.5.0"
+

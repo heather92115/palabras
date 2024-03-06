@@ -183,6 +183,8 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
         // Grab more pairs if the user has finished learning the already tested pairs.
         if study_list.len() < limit as usize {
             study_list.extend(not_tested.into_iter().take(limit as usize - study_list.len()));
+        } else {
+            study_list.truncate(limit as usize);
         }
 
         Ok(study_list)
