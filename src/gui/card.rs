@@ -1,4 +1,4 @@
-use iced::widget::{Button, checkbox, Column, Container, Text, text, text_input, TextInput};
+use iced::widget::{Button, Column, Container, Text, TextInput};
 use iced::{Alignment, Element, Length, Sandbox, Theme};
 use iced::alignment::{Horizontal, Vertical};
 use crate::gui::study_words::{ManageStudySet, StudySet};
@@ -80,25 +80,6 @@ impl Sandbox for Card {
 
     fn view(&self) -> Element<Self::Message> {
 
-        let checkbox = checkbox("desc", true)
-            .on_toggle(Message::CheckMatch)
-            .width(Length::Fill)
-            .text_shaping(text::Shaping::Advanced);
-
-        let input = text_input("What needs to be done?", &self.user_response)
-            .on_input(Message::Response)
-            .on_submit(Message::CheckMatch)
-            .padding(15)
-            .size(30);
-
-        let old = TextInput::new(
-            "Enter your response here...qué",
-            &self.user_response
-        )
-            .size(30)
-            .on_input(Message::Response)
-            .on_submit(Message::CheckMatch);
-
         let mut content = Column::new()
             .align_items(Alignment::Center)
             .spacing(20)
@@ -111,7 +92,7 @@ impl Sandbox for Card {
                 content =
                     content.push(
                         TextInput::new(
-                            "Enter your response here...qué",
+                            "Enter your response here...",
                             &self.user_response
                         )
                         .size(30)
@@ -140,6 +121,4 @@ impl Sandbox for Card {
     fn theme(&self) -> Theme {
         Theme::Dark
     }
-
-
 }
