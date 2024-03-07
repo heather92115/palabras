@@ -153,7 +153,7 @@ impl VocabStudyRepository for DbVocabStudyRepository {
         let mut conn = get_connection();
 
         let results = vocab_study
-            .inner_join(vocab.on(id.eq(vocab_id)))
+            .inner_join(vocab)
             .filter(awesome_person_id.eq(ap_id))
             .load::<(VocabStudy, Vocab)>(&mut conn)
             .map_err(|err| err.to_string())?;
