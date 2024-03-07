@@ -5,7 +5,7 @@ use crate::dal::file_access::{
 use crate::dal::vocab::{DbVocabRepository, VocabRepository};
 use crate::dal::vocab_study::{DbVocabStudyRepository, VocabStudyRepository};
 use crate::models::{NewVocab, NewVocabStudy, Vocab, VocabStudy};
-use crate::sl::learn_pairs::{WELL_KNOWN_THRESHOLD};
+use crate::sl::study_vocab::{WELL_KNOWN_THRESHOLD};
 use diesel::result::Error as DieselError;
 use lazy_static::lazy_static;
 use std::collections::HashMap;

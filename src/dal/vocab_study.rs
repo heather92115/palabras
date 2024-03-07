@@ -30,7 +30,6 @@ pub trait VocabStudyRepository {
     /// record matches the given `vocab_study_id`).
     fn get_vocab_study_by_id(&self, vocab_study_id: i32) -> Result<VocabStudy, DieselError>;
 
-
     ///
     /// Gets a single vocab study using its two foreign references
     ///
@@ -45,24 +44,33 @@ pub trait VocabStudyRepository {
     /// or a `DieselError` if the query fails (e.g., due to connection issues or if no
     /// record matches the given `vocab_study_id`).
     fn get_vocab_study_by_foreign_refs(&self, v_id: i32, ap_id:  i32) -> Result<Option<VocabStudy>, DieselError>;
-    
-    
-    /// Retrieves a list of `VocabStudy` records to be studied, excluding those marked as fully known.
+
+
+    /// Retrieves a study set of vocabulary pairs for a specified awesome person.
     ///
-    /// This function performs a database query to select vocab studys based on their `percentage_correct` field,
-    /// prioritizing records that need further study. records already marked as fully known are excluded from the results.
+    /// This function queries the database to find all vocabulary pairs associated with
+    /// the given `awesome_person_id`. It performs an inner join between the `vocab_study`
+    /// and `vocab` tables to gather detailed information about each vocabulary item in the
+    /// study set.
+    ///
+    /// # Parameters
+    ///
+    /// - `ap_id`: The identifier of the awesome person for whom the study set is being retrieved.
     ///
     /// # Returns
     ///
     /// A `Result` containing either:
-    /// - `Ok(Vec<VocabStudy>)`: A vector of `VocabStudy` instances up to the specified limit,
-    ///   ordered by ascending `percentage_correct` value.
-    /// - `Err(String)`: An error message string if the database query fails.
+    /// - `Ok(Vec<(VocabStudy, Vocab)>)`: A vector of tuples, each containing a `VocabStudy`
+    ///   record and its corresponding `Vocab` record, representing the study set for the
+    ///   specified awesome person.
+    /// - `Err(String)`: An error message string if the database query fails. This could be
+    ///   due to connection issues, or if the query itself encounters an error.
     ///
     /// # Errors
     ///
-    /// Returns an error if there's an issue executing the query, including connection problems
-    /// or syntax errors in the query itself. The error is returned as a `String` describing the failure.
+    /// This function will return an error if:
+    /// - There is a problem connecting to the database.
+    /// - The SQL query fails to execute properly.
     fn get_study_set(&self, ap_id: i32) -> Result<Vec<(VocabStudy, Vocab)>, String>;
 
     /// Inserts a new `VocabStudy` record into the database.
@@ -85,7 +93,8 @@ pub trait VocabStudyRepository {
     /// # Errors
     ///
     /// Returns an error if there's an issue performing the insert operation, including connection problems
-    /// or violations of database constraints (e.g., unique constraints). The error is returned as a `String`
+    /// or violations of database constraints (e.g., unique constraints, foreign key constraints).
+    /// The error is returned as a `String`
     /// describing the failure.
     fn create_vocab_study(
         &self,

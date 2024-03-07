@@ -6,8 +6,6 @@ use diesel::{QueryDsl, RunQueryDsl};
 
 /// Trait for interacting with awesome person records in a database.
 ///
-/// TODO: Add the ability to track more than just one user.
-///
 /// This trait abstracts the operations related to fetching and updating records, allowing for
 /// different implementations including ones suitable for testing with mock data.
 pub trait AwesomePersonRepository {

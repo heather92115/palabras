@@ -1,6 +1,6 @@
 use dotenv::dotenv;
 use palabras::dal::db_connection::verify_connection_migrate_db;
-use palabras::sl::learn_pairs::create_fuzzy_match_service;
+use palabras::sl::study_vocab::create_fuzzy_match_service;
 use std::error::Error;
 use std::io;
 use std::io::Write;

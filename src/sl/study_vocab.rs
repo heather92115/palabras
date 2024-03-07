@@ -14,8 +14,37 @@ pub static MAX_DISTANCE: usize = 10;
 pub static WELL_KNOWN_THRESHOLD: f64 = 0.98;
 
 pub trait LearnVocab {
-    
-    // todo docs
+
+    /// Retrieves a prioritized list of vocabulary sets for learning or review for a specified awesome person.
+    ///
+    /// This function queries the database to get a study set of vocabulary pairs for the given `awesome_id`.
+    /// It prioritizes vocabulary based on whether it has been tested before and if it is not marked as well known.
+    /// The result is a list of vocabulary pairs sorted to prioritize learning, with a limit on the number of pairs returned.
+    ///
+    /// # Parameters
+    ///
+    /// - `awesome_id`: The identifier of the awesome person for whom the vocabulary set is  being retrieved.
+    /// - `limit`: The maximum size of the vocabulary set to return.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing either:
+    /// - `Ok(Vec<(VocabStudy, Vocab)>)`: A vector of tuples, each containing a `VocabStudy` record
+    ///   and its corresponding `Vocab` record, limited by the specified `limit`.
+    /// - `Err(String)`: An error message string if the retrieval process fails.
+    ///
+    /// # Details
+    ///
+    /// The function first filters the vocabulary pairs to separate them into two groups based on their
+    /// learning priority. Then, it sorts the high-priority group by the `last_tested` date to prioritize
+    /// the most recently tested items. If the high-priority group contains fewer items than the specified limit,
+    /// additional pairs from the secondary group are added to the result set. The final list is then truncated
+    /// to meet the specified `limit` and reversed to ensure variety in presentation.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if:
+    /// - The retrieval of the study set from the database fails.
     fn get_vocab_to_learn(&self, awesome_id: i32, limit: i64) -> Result<Vec<(VocabStudy, Vocab)>, String>;
 
     /// Evaluates the guessed word against potential correct answers, returning the "distance" from an exact match.
@@ -164,28 +193,36 @@ impl VocabFuzzyMatch {
 /// matching calculate the distance, The distance from a perfect match to decides how to change the vocab
 /// correctness.
 impl LearnVocab for VocabFuzzyMatch {
+
+    /// Implementation, see trait for details [`LearnVocab::get_vocab_to_learn`]
+    ///
+    /// For advanced usage and mock implementations, please refer to
+    /// the integration tests in this module.
     fn get_vocab_to_learn(&self, awesome_id: i32, limit: i64) -> Result<Vec<(VocabStudy, Vocab)>, String> {
         let study_set = self.vocab_study_repo.get_study_set(awesome_id)?;
 
-        // Separate tuples into those that have been tested and those that have not.
-        let (mut testing_started, not_tested_yet): (Vec<_>, Vec<_>)
+        // Separate tuples into two groups for prioritization.
+        let (mut target_group, secondary_group): (Vec<_>, Vec<_>)
             = study_set.into_iter()
-                .partition(|(vs, _)| vs.last_tested.is_some());
+                .filter(|(_, v)| !v.first_lang.is_empty())
+                .partition(|(vs, _)| vs.last_tested.is_some() && !vs.well_known);
 
-        // Now sort the list by last_tested in ascending order giving a little time before presenting
-        // the last studied set again.
-        testing_started.sort_by(|(a_study, _), (b_study, _)| {
-            a_study.last_tested.clone().unwrap_or_default().cmp(&b_study.last_tested.clone().unwrap_or_default())
+        // Sorts the list by last_tested to find the most recently studied in the target group.
+        target_group.sort_by(|(a_study, _), (b_study, _)| {
+            b_study.last_tested.clone().unwrap_or_default().cmp(&a_study.last_tested.clone().unwrap_or_default())
         });
 
-        // Grab more pairs if the user has finished learning the already tested pairs.
-        if testing_started.len() < limit as usize {
-            testing_started.extend(not_tested_yet.into_iter().take(limit as usize - testing_started.len()));
+        // Grab more pairs from the secondary group as needed.
+        if target_group.len() < limit as usize {
+            target_group.extend(secondary_group.into_iter().take(limit as usize - target_group.len()));
         } else {
-            testing_started.truncate(limit as usize);
+            target_group.truncate(limit as usize);
         }
 
-        Ok(testing_started)
+        // Reverse the order to keep from presenting last word testing in the last set first in this set.
+        target_group.reverse();
+
+        Ok(target_group)
     }
 
     /// Implementation, see trait for details [`LearnVocab::check_vocab_match`]

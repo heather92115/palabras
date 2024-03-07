@@ -5,7 +5,7 @@ use crate::dal::vocab_study::VocabStudyRepository;
 use crate::models::{AwesomePerson, Vocab, VocabStudy};
 use crate::models::{NewVocabStudy};
 use diesel::result::Error as DieselError;
-use crate::sl::learn_pairs::VocabFuzzyMatch;
+use crate::sl::study_vocab::VocabFuzzyMatch;
 
 pub struct TestFixtures {
     pub fuzzy_service: Box<VocabFuzzyMatch>
