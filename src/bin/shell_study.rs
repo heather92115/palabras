@@ -14,32 +14,34 @@ pub fn main() -> Result<(), Box<dyn Error>> {
 
     verify_connection_migrate_db();
 
+    let awesome_person_id = 1; // todo make this not for just me
+
     let match_service = create_fuzzy_match_service();
-    let pairs = match_service.get_study_pairs(10)?;
-    for pair in pairs {
+    let study_set = match_service.get_vocab_to_learn(awesome_person_id, 10)?;
+    for (vocab_study, vocab) in study_set {
         println!();
-        println!("{}", match_service.determine_prompt(pair.clone()));
+        println!("{}", match_service.determine_prompt(&vocab, &vocab_study.user_notes.unwrap_or_default()));
 
         io::stdout().flush().unwrap(); // Ensure the prompt is displayed before reading input
         let mut guess = String::new(); // Create a mutable variable to store the input
 
         io::stdin().read_line(&mut guess)?;
 
-        let distance = match_service.check_pair_match(
-            &pair.learning_lang,
-            &pair.alternatives.unwrap(),
+        let distance = match_service.check_vocab_match(
+            &vocab.learning_lang,
+            &vocab.alternatives.clone().unwrap(),
             &guess,
         );
 
-        let updated = match_service.update_pair_stats(pair.id, distance)?;
+        let updated = match_service.update_vocab_study_stats(vocab_study.id, awesome_person_id, distance)?;
 
         if distance > 0 {
-            println!("'{}' != '{}'", &pair.learning_lang, &guess.trim());
+            println!("'{}' != '{}'", &vocab.learning_lang, &guess.trim());
         }
 
         println!(
             "Correctness {} -> {}",
-            &pair.percentage_correct.unwrap(),
+            &vocab_study.percentage_correct.unwrap(),
             &updated.percentage_correct.unwrap()
         );
     }

@@ -7,7 +7,7 @@ use std::io;
 use std::io::{BufRead, BufReader, BufWriter, Lines, Write};
 use std::iter::Skip;
 use std::string::ToString;
-use crate::models::TranslationPair;
+use crate::models::Vocab;
 
 pub fn find_first_lang_translations(
     config: &TranslationsConfig,
@@ -125,7 +125,7 @@ pub fn find_with_splitter(
 }
 
 static CSV_HEADER: &str = "learning, infinitive, pos\n";
-pub fn write_missing_first_export(file_path: &str, pairs: Vec<TranslationPair>)
+pub fn write_missing_first_export(file_path: &str, pairs: Vec<Vocab>)
     -> Result<(), Box<dyn Error>> {
 
     let mut buf_writer = open_writing_file_buffer(file_path)?;
