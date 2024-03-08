@@ -1,128 +1,17 @@
 use crate::config::{TranslationsConfig, VocabConfig};
 use crate::dal::file_access::{
-    find_first_lang_translations, load_buffer_from_file, write_missing_first_export,
+    find_first_lang_translations, write_missing_first_export,
 };
-use crate::dal::translation_pair::{DbTranslationPairRepository, TranslationPairRepository};
-use crate::models::{NewTranslationPair, TranslationPair};
-use crate::sl::learn_pairs::{FULLY_KNOWN_THRESHOLD, TOO_EASY_THRESHOLD};
+use crate::dal::vocab::{DbVocabRepository, VocabRepository};
+use crate::dal::vocab_study::{DbVocabStudyRepository, VocabStudyRepository};
+use crate::models::{NewVocab, NewVocabStudy, Vocab, VocabStudy};
+use crate::sl::study_vocab::{WELL_KNOWN_THRESHOLD};
 use diesel::result::Error as DieselError;
 use lazy_static::lazy_static;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Mutex;
-
-/// This service handles importing Duolingo vocab exports. It looks for close matches in words and
-/// combines then using the alternative field.
-
-/// These structs are used to deserialize the Duolingo JSON file. It is possible their schema will change
-/// which will require these structs to be updated to match.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LanguageData {
-    language_string: String,
-    learning_language: String,
-    from_language: String,
-    language_information: LanguageInformation,
-    pub vocab_overview: Vec<VocabOverview>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LanguageInformation {
-    pronoun_mapping: Vec<PronounMapping>,
-    tenses: Tenses,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct PronounMapping {
-    tenses: HashMap<String, String>,
-    pronoun: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Tenses {
-    indicative: Vec<TenseDetail>,
-    subjunctive: Vec<TenseDetail>,
-    others: Vec<TenseDetail>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct TenseDetail {
-    tense_string: String,
-    tense: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct VocabOverview {
-    #[serde(default)]
-    strength_bars: u8,
-    infinitive: Option<String>,
-    #[serde(default)]
-    normalized_string: String,
-    pos: Option<String>,
-    #[serde(default)]
-    last_practiced_ms: u64,
-    #[serde(default)]
-    skill: String,
-    #[serde(default = "default_related_lexemes")]
-    related_lexemes: Vec<String>,
-    #[serde(default)]
-    last_practiced: Option<String>,
-    strength: f64,
-    skill_url_title: Option<String>,
-    gender: Option<String>,
-    #[serde(default)]
-    id: String,
-    #[serde(default)]
-    lexeme_id: String,
-    word_string: String,
-}
-
-fn default_related_lexemes() -> Vec<String> {
-    vec![]
-}
-
-/// Loads vocabulary data from a JSON file into a `LanguageData` struct.
-///
-/// This function is designed to parse vocabulary data stored in a JSON format file, converting it
-/// into a `LanguageData` struct for further processing or analysis. It handles opening the file,
-/// reading its contents, and deserializing the JSON into the specified Rust data structure.
-///
-/// # Arguments
-///
-/// * `json_file_name` - A string slice that holds the name (and path, if necessary) of the JSON
-/// file containing the vocabulary data.
-///
-/// # Returns
-///
-/// Returns `Ok(LanguageData)` containing the deserialized vocabulary data if successful, or an
-/// `Err(String)` containing an error message if the operation fails.
-///
-/// # Errors
-///
-/// This function can return an error in several cases, including:
-/// - The JSON file cannot be opened (e.g., due to incorrect path or permissions issues).
-/// - The file's contents cannot be properly deserialized into the `LanguageData` struct (e.g., due
-/// to mismatched data formats or corrupted data).
-///
-/// # Example
-///
-/// Assuming a JSON file named "vocab_data.json" exists in the current directory and contains
-/// valid vocabulary data formatted for the `LanguageData` struct:
-///
-/// ```
-/// use std::error::Error;
-/// use palabras::sl::sync_vocab::load_vocab_from_json;
-/// let vocab_data = load_vocab_from_json("tests/data/duo_vocab.json");
-/// println!("Loaded vocabulary data successfully.");
-///
-/// ```
-pub fn load_vocab_from_json(json_file_name: &str) -> Result<LanguageData, String> {
-    // Load the JSON file into a buffer.
-    let reader = load_buffer_from_file(json_file_name).map_err(|err| err.to_string())?;
-    let vocab_overview = serde_json::from_reader(reader).map_err(|err| err.to_string())?;
-
-    Ok(vocab_overview)
-}
+use crate::sl::duo_import::{LanguageData, load_vocab_from_json, VocabOverview};
 
 /// Determines hints for a given phrase by analyzing its length and the presence of specific pronouns.
 ///
@@ -202,9 +91,9 @@ pub fn determine_hint(vocab_config: &VocabConfig, learning: &str) -> Option<Stri
 /// # Examples
 ///
 /// ```
-/// use palabras::models::TranslationPair;
+/// use palabras::models::Vocab;
 /// use palabras::sl::sync_vocab::merge_learning;
-/// let mut pair = TranslationPair {
+/// let mut pair = Vocab {
 ///     learning_lang: "cats".to_string(),
 ///     alternatives: None,
 ///     ..Default::default()
@@ -219,7 +108,7 @@ pub fn determine_hint(vocab_config: &VocabConfig, learning: &str) -> Option<Stri
 /// assert_eq!(pair.alternatives, Some("cats, kitty".to_string()));
 /// ```
 pub fn merge_learning(
-    current: &mut TranslationPair,
+    current: &mut Vocab,
     additional_learning: String,
     plural_suffix: &str,
 ) {
@@ -267,8 +156,9 @@ pub fn merge_learning(
 /// ```
 /// // Assume the existence of appropriate structure and enum definitions for this example.
 /// use palabras::config::VocabConfig;
-/// use palabras::models::TranslationPair;
-/// use palabras::sl::sync_vocab::{merge, VocabOverview};
+/// use palabras::models::Vocab;
+/// use palabras::sl::duo_import::VocabOverview;
+/// use palabras::sl::sync_vocab::{merge};
 /// let vocab_config = VocabConfig {
 ///     vocab_json_file_name: "".to_string(),
 ///     plural_suffix: Some("s".to_string()),
@@ -276,10 +166,9 @@ pub fn merge_learning(
 ///     pronouns: None
 /// };
 ///
-/// let mut translation_pair = TranslationPair {
+/// let mut vocab = Vocab {
 ///     learning_lang: "gato".to_string(),
 ///     first_lang: "".to_string(),
-///     percentage_correct: None,
 ///     ..Default::default()
 /// };
 ///
@@ -287,16 +176,15 @@ pub fn merge_learning(
 /// let vocab_overview: VocabOverview =
 /// serde_json::from_str(json_str).expect("JSON should deserialize");
 ///
-/// merge(&vocab_config, &mut translation_pair, &vocab_overview, "cat".to_string());
+/// merge(&vocab_config, &mut vocab, &vocab_overview, "cat".to_string());
 ///
-/// assert_eq!(translation_pair.learning_lang, "gato");
-/// assert_eq!(translation_pair.first_lang, "cat");
-/// assert_eq!(translation_pair.alternatives, Some("gatos".to_string()));
-/// assert!(translation_pair.fully_known);
+/// assert_eq!(vocab.learning_lang, "gato");
+/// assert_eq!(vocab.first_lang, "cat");
+/// assert_eq!(vocab.alternatives, Some("gatos".to_string()));
 /// ```
 pub fn merge(
     vocab_config: &VocabConfig,
-    current: &mut TranslationPair,
+    current: &mut Vocab,
     item: &VocabOverview,
     first: String,
 ) {
@@ -315,15 +203,28 @@ pub fn merge(
         current.first_lang = first;
     }
 
-    // Update the strength if it is higher
-    if item.strength > current.percentage_correct.clone().unwrap_or_default() {
-        current.percentage_correct = Some(item.strength);
-        current.fully_known = item.strength > FULLY_KNOWN_THRESHOLD;
-        current.too_easy = item.strength > TOO_EASY_THRESHOLD;
-    }
-
     current.infinitive = Some(item.infinitive.clone().unwrap_or_default());
     current.pos = Some(item.pos.clone().unwrap_or_default());
+}
+
+pub fn create_vocab_study(vocab_id: i32, awesome_id: i32, percentage: f64) -> Result<(), String> {
+
+    let vocab_study_repo = DbVocabStudyRepository;
+
+    let new_vocab_study = NewVocabStudy {
+        vocab_id,
+        awesome_person_id: awesome_id,
+        percentage_correct: Some(percentage),
+        well_known: percentage > WELL_KNOWN_THRESHOLD,
+
+        // Other fields use their default values
+        ..Default::default()
+    };
+
+    vocab_study_repo.create_vocab_study(&new_vocab_study)
+        .map_err(|err| err.to_string())?;
+
+    Ok(())
 }
 
 /// Creates a new translation pair and stores it in the database.
@@ -339,6 +240,7 @@ pub fn merge(
 /// * `item` - A reference to a `VocabOverview` instance containing data for the learning language side
 /// of the translation pair.
 /// * `first` - A `String` representing the translation of the item in the first language.
+/// * `awesome_person_id` - Primary key for the awesome person table. The current user's id.
 ///
 /// # Returns
 ///
@@ -377,18 +279,17 @@ pub fn create(
     vocab_config: &VocabConfig,
     item: &VocabOverview,
     first: String,
+    awesome_person_id: i32,
 ) -> Result<(), String> {
     // Get the dal repo for translation pairs. It requires a database connection.
-    let pair_repo = DbTranslationPairRepository;
+    let vocab_repo = DbVocabRepository;
     let learning_lang = item.word_string.clone();
     let hint = determine_hint(vocab_config, &learning_lang);
 
-    let new_translation_pair = NewTranslationPair {
+    let new_vocab = NewVocab {
         first_lang: first,
         learning_lang,
-        percentage_correct: Some(item.strength.clone()),
-        fully_known: item.strength > FULLY_KNOWN_THRESHOLD,
-        too_easy: item.strength > TOO_EASY_THRESHOLD,
+
         skill: Some(item.skill.clone()),
         infinitive: Some(item.infinitive.clone().unwrap_or_default()),
         pos: Some(item.pos.clone().unwrap_or_default()),
@@ -397,9 +298,15 @@ pub fn create(
         ..Default::default()
     };
 
-    pair_repo
-        .create_translation_pair(&new_translation_pair)
+    let vocab = vocab_repo
+        .create_vocab(&new_vocab)
         .map_err(|err| err.to_string())?;
+
+    // Now create the matching vocab study for this user, since the vocab is new
+    // it cannot already exist.
+    create_vocab_study(vocab.id, awesome_person_id, item.strength)
+        .map_err(|err| err.to_string())?;
+    
 
     Ok(())
 }
@@ -436,13 +343,13 @@ pub fn create(
 /// ```ignore
 /// // Assume an existing `DbTranslationPairRepository` and a connection to a database
 ///
-/// // If "gato, gata or gatas" is in the database, its translation_pair will be found and returned.
+/// // If "gato, gata or gatas" is in the database, its vocab will be found and returned.
 /// let non_verb_suffixes = "o,a,os,as,e,es";
 /// let learning_lang_word = "gatos";
 ///
 /// match find_similar(non_verb_suffixes, learning_lang_word) {
-///     Ok(Some(translation_pair)) => {
-///         println!("Found a similar word: {}", translation_pair.learning_lang);
+///     Ok(Some(vocab)) => {
+///         println!("Found a similar word: {}", vocab.learning_lang);
 ///     },
 ///     Ok(None) => {
 ///         println!("No similar word found.");
@@ -458,8 +365,8 @@ pub fn create(
 fn find_similar(
     non_verb_matching_suffixes: &str,
     learning_lang: &str,
-) -> Result<Option<TranslationPair>, DieselError> {
-    let pair_repo = DbTranslationPairRepository;
+) -> Result<Option<Vocab>, DieselError> {
+    let vocab_repo = DbVocabRepository;
 
     let learning = learning_lang.to_lowercase();
 
@@ -481,10 +388,10 @@ fn find_similar(
                 let alt_word = format!("{}{}", stem, alt_suffix); // ex: gat becomes gata, gatos, gatas
 
                 // Attempt to search for a translation pair using the newly contructed alternative
-                if let Ok(Some(translation_pair)) =
-                    pair_repo.find_translation_pair_by_learning_language(alt_word)
+                if let Ok(Some(vocab)) =
+                    vocab_repo.find_vocab_by_learning_language(alt_word)
                 {
-                    return Ok(Some(translation_pair)); // Found a similar word form, return it
+                    return Ok(Some(vocab)); // Found a similar word form, return it
                 }
             }
         }
@@ -532,9 +439,9 @@ fn find_similar(
 /// // Assume `vocab_config` is an instance of VocabConfig with relevant settings,
 /// // and `item` is a VocabOverview filled with information about a specific word.
 ///
-/// match find_translation_pair(&vocab_config, &item) {
-///     Ok(Some(translation_pair)) => {
-///         println!("Found a matching translation pair: {:?}", translation_pair);
+/// match find_vocab(&vocab_config, &item) {
+///     Ok(Some(vocab)) => {
+///         println!("Found a matching translation pair: {:?}", vocab);
 ///     },
 ///     Ok(None) => {
 ///         println!("No matching translation pair found.");
@@ -544,22 +451,22 @@ fn find_similar(
 ///     }
 /// }
 /// ```
-pub fn find_translation_pair(
+pub fn find_vocab(
     vocab_config: &VocabConfig,
     item: &VocabOverview,
-) -> Result<Option<TranslationPair>, String> {
-    let pair_repo = DbTranslationPairRepository;
+) -> Result<Option<Vocab>, String> {
+    let vocab_repo = DbVocabRepository;
 
     // First, try finding the translation pair by the learning language directly.
     if let Ok(Some(current)) =
-        pair_repo.find_translation_pair_by_learning_language(item.word_string.clone())
+        vocab_repo.find_vocab_by_learning_language(item.word_string.clone())
     {
         return Ok(Some(current));
     }
 
     // Second, try finding if it's already an alternative
     if let Ok(Some(current)) =
-        pair_repo.find_translation_pair_by_alternative(item.word_string.clone())
+        vocab_repo.find_vocab_by_alternative(item.word_string.clone())
     {
         return Ok(Some(current));
     }
@@ -575,6 +482,38 @@ pub fn find_translation_pair(
     }
 
     Ok(None)
+}
+
+pub fn sync_vocab_study(vocab_id: i32, awesome_person_id: i32, percentage: f64) -> Result<(), String> {
+
+    let vocab_study_repo = DbVocabStudyRepository;
+
+    if let Some(vocab_study) = vocab_study_repo
+        .get_vocab_study_by_foreign_refs(vocab_id, awesome_person_id)
+        .map_err(|e| e.to_string())? {
+
+        // Update the strength if it is higher
+        if percentage > vocab_study.percentage_correct.unwrap_or_default() {
+
+            let updating = VocabStudy {
+                percentage_correct: Some(percentage),
+                well_known: percentage > WELL_KNOWN_THRESHOLD,
+
+                ..vocab_study // Keep the rest of the values the same
+            };
+
+            vocab_study_repo
+                .update_vocab_study(updating)
+                .map_err(|err| err.to_string())?;
+        }
+    } else {
+        // This user doesn't already have a mapping to the vocab so it
+        // needs to be added.
+        create_vocab_study(vocab_id, awesome_person_id, percentage)
+            .map_err(|err| err.to_string())?;
+    }
+
+    Ok(())
 }
 
 // Creating a mutex to guard the complex logic within process_duo_vocab
@@ -599,6 +538,7 @@ lazy_static! {
 /// * `vocab_config` - A reference to a `VocabConfig` structure containing settings and preferences for vocabulary processing. From `vocab_config.json`
 /// * `vocabulary_overview` - A reference to a `LanguageData` structure that encapsulates the vocabulary items to be processed. Imported DuoVocab from `https://www.duolingo.com/vocabulary/overview`
 /// * `translation_map` - A reference to a `HashMap<String, String>` that maps learning language terms to their translations in the first language. Loaded from CSV files using `translations_config.json`
+/// * `awesome_id` - Primary key for the awesome person table. The current user's id.
 ///
 /// # Returns
 ///
@@ -610,7 +550,7 @@ lazy_static! {
 /// This function may return an error if:
 /// - It fails to acquire the mutex lock necessary for thread-safe operations.
 /// - There are issues accessing the database, such as connection problems or errors in query execution.
-/// - Any of the utilized subroutines (`find_translation_pair`, `merge`, or `create`) encounter errors in their execution.
+/// - Any of the utilized subroutines (`find_vocab`, `merge`, or `create`) encounter errors in their execution.
 ///
 /// # Examples
 ///
@@ -631,12 +571,13 @@ fn process_duo_vocab(
     vocab_config: &VocabConfig,
     vocabulary_overview: &LanguageData,
     translation_map: &HashMap<String, String>,
+    awesome_id: i32
 ) -> Result<(), String> {
     // Acquire the lock before proceeding with import and updates.
     let _lock = PROCESS_MUTEX.lock().map_err(|e| e.to_string())?;
 
     // Get the dal repo for translation pairs. It requires a database connection.
-    let pair_repo = DbTranslationPairRepository;
+    let vocab_repo = DbVocabRepository;
 
     for item in &vocabulary_overview.vocab_overview {
         let learning_lang = &item.word_string;
@@ -648,14 +589,18 @@ fn process_duo_vocab(
             .unwrap_or_default();
 
         // Attempt to find an existing translation pair by learning language.
-        match find_translation_pair(vocab_config, item) {
+        match find_vocab(vocab_config, item) {
             Ok(Some(mut current)) => {
+                let vocab_id = current.id;
                 merge(vocab_config, &mut current, item, translated_first);
-                pair_repo
-                    .update_translation_pair(current)
+                vocab_repo
+                    .update_vocab(current)
+                    .map_err(|err| err.to_string())?;
+
+                sync_vocab_study(vocab_id, awesome_id, item.strength)
                     .map_err(|err| err.to_string())?;
             }
-            Ok(None) => create(vocab_config, item, translated_first)?,
+            Ok(None) => create(vocab_config, item, translated_first, awesome_id)?,
             Err(e) => return Err(e.to_string()),
         }
     }
@@ -762,6 +707,8 @@ pub fn load_translations(
 /// translations, providing details such as file paths, header information, delimiters for CSV files, and regular
 /// expressions for extracting terms from XML files.
 ///
+/// * `awesome_id` - Primary key for the awesome person table. The current user's id.
+///
 /// # Returns
 ///
 /// Returns `Ok(())` if the import, translation, and database integration process completes successfully.
@@ -811,10 +758,11 @@ pub fn load_translations(
 pub fn import_duo_vocab(
     vocab_config: &VocabConfig,
     translation_configs: Option<Vec<TranslationsConfig>>,
+    awesome_id: i32,
 ) -> Result<(), String> {
     let vocab = load_vocab_from_json(&vocab_config.vocab_json_file_name)?;
     let translation_map = load_translations(translation_configs);
-    process_duo_vocab(vocab_config, &vocab, &translation_map)
+    process_duo_vocab(vocab_config, &vocab, &translation_map, awesome_id)
 }
 
 /// Exports translation pairs with missing "first language" fields to a CSV file.
@@ -838,9 +786,9 @@ pub fn import_duo_vocab(
 /// See integration test `tests/export_first_lang_missing_test.rs`
 pub fn export_missing_first_lang_pairs(file_path: &str) -> Result<(), Box<dyn Error>> {
     // Get the dal repo for translation pairs. It requires a database connection.
-    let pair_repo = DbTranslationPairRepository;
+    let vocab_repo = DbVocabRepository;
     // Find all the pairs with missing first language fields.
-    let pairs = pair_repo.get_empty_first_lang_pairs(i64::MAX)?;
+    let pairs = vocab_repo.get_empty_first_lang(i64::MAX)?;
 
     write_missing_first_export(file_path, pairs)?;
 

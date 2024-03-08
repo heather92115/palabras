@@ -1,8 +1,9 @@
 use palabras::config::{Pronoun, TranslationsConfig, VocabConfig};
 use palabras::dal::db_connection::verify_connection_migrate_db;
-use palabras::dal::translation_pair::{DbTranslationPairRepository, TranslationPairRepository};
-use palabras::models::TranslationPair;
-use palabras::sl::sync_vocab::{import_duo_vocab, load_vocab_from_json};
+use palabras::dal::vocab::{DbVocabRepository, VocabRepository};
+use palabras::models::Vocab;
+use palabras::sl::duo_import::load_vocab_from_json;
+use palabras::sl::sync_vocab::import_duo_vocab;
 
 #[test]
 fn test_load_from_json() {
@@ -58,14 +59,16 @@ fn test_import_vocab_use_xml_no_combining() {
         },
     ];
 
-    import_duo_vocab(&vocab_config, Some(translation_configs)).unwrap_or_else(|err| {
+    let awesome_person_id = 1;
+
+    import_duo_vocab(&vocab_config, Some(translation_configs), awesome_person_id).unwrap_or_else(|err| {
         eprintln!("Problem processing word pairs: {}", err);
         panic!("Import failed");
     });
 
-    let repo = DbTranslationPairRepository;
+    let repo = DbVocabRepository;
 
-    if let Ok(list) = repo.get_empty_first_lang_pairs(10) {
+    if let Ok(list) = repo.get_empty_first_lang(10) {
         assert!(list.len() > 0, "Expected records");
     } else {
         panic!("Should have returned result.")
@@ -105,14 +108,16 @@ fn test_import_small_vocab_with_llm_translations() {
         ..Default::default()
     }];
 
-    import_duo_vocab(&vocab_config, Some(translation_configs)).unwrap_or_else(|err| {
+    let awesome_person_id = 1;
+
+    import_duo_vocab(&vocab_config, Some(translation_configs), awesome_person_id).unwrap_or_else(|err| {
         eprintln!("Problem processing word pairs: {}", err);
         panic!("Import failed");
     });
 
-    let repo = DbTranslationPairRepository;
+    let repo = DbVocabRepository;
 
-    if let Ok(list) = repo.get_empty_first_lang_pairs(10) {
+    if let Ok(list) = repo.get_empty_first_lang(10) {
         assert!(list.len() > 0, "Expected records");
     } else {
         panic!("Should have returned result.")
@@ -146,14 +151,16 @@ fn test_import_duo_vocab_no_xml() {
         ..Default::default()
     }];
 
-    import_duo_vocab(&vocab_config, Some(translation_configs)).unwrap_or_else(|err| {
+    let awesome_person_id = 1;
+
+    import_duo_vocab(&vocab_config, Some(translation_configs), awesome_person_id).unwrap_or_else(|err| {
         eprintln!("Problem processing word pairs: {}", err);
         panic!("Import failed");
     });
 
-    let repo = DbTranslationPairRepository;
+    let repo = DbVocabRepository;
 
-    if let Ok(list) = repo.get_empty_first_lang_pairs(10) {
+    if let Ok(list) = repo.get_empty_first_lang(10) {
         assert!(list.len() > 0, "Expected records");
     } else {
         panic!("Should have returned result.")
@@ -174,16 +181,18 @@ fn test_import_vocab_combine_similar_playa() {
         pronouns: None,
     };
 
-    import_duo_vocab(&vocab_config, None).unwrap_or_else(|err| {
+    let awesome_person_id = 1;
+
+    import_duo_vocab(&vocab_config, None, awesome_person_id).unwrap_or_else(|err| {
         eprintln!("Problem processing word pairs: {}", err);
         panic!("Import failed");
     });
 
-    let repo = DbTranslationPairRepository;
+    let repo = DbVocabRepository;
 
     // Get them all to make sure our records get included
-    if let Ok(list) = repo.get_empty_first_lang_pairs(i64::MAX) {
-        let filtered: Vec<TranslationPair> = list
+    if let Ok(list) = repo.get_empty_first_lang(i64::MAX) {
+        let filtered: Vec<Vocab> = list
             .into_iter()
             .filter(|tp| tp.learning_lang.starts_with("testingplaya"))
             .collect();
@@ -216,16 +225,17 @@ fn test_import_vocab_combine_similar_amarilla() {
         pronouns: None,
     };
 
-    import_duo_vocab(&vocab_config, None).unwrap_or_else(|err| {
+
+    import_duo_vocab(&vocab_config, None, 1).unwrap_or_else(|err| {
         eprintln!("Problem processing word pairs: {}", err);
         panic!("Import failed");
     });
 
-    let repo = DbTranslationPairRepository;
+    let repo = DbVocabRepository;
 
     // Get them all to make sure our records get included
-    if let Ok(list) = repo.get_empty_first_lang_pairs(i64::MAX) {
-        let filtered: Vec<TranslationPair> = list
+    if let Ok(list) = repo.get_empty_first_lang(i64::MAX) {
+        let filtered: Vec<Vocab> = list
             .into_iter()
             .filter(|tp| tp.learning_lang.starts_with("testingamarill"))
             .collect();

@@ -26,7 +26,7 @@ To update the project:
 [Developer Setup](docs/developers.md)
 
 # Running
-> cargo run
+> cargo run --bin shell_study
 
 _Note: This is only a command line interface for now_
 

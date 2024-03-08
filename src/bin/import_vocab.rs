@@ -38,6 +38,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok(); // Load environment variables from .env file
     verify_connection_migrate_db();
 
+    let awesome_person_id = 1; // todo make this not for just me
+
     let vocab_config = load_vocab_config().unwrap_or_else(|err| {
         eprintln!("Failed to load import translation configs: {}", err);
         process::exit(2);
@@ -45,7 +47,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let translation_configs = load_translations_config().unwrap_or(None);
 
-    import_duo_vocab(&vocab_config, translation_configs).unwrap_or_else(|err| {
+    import_duo_vocab(&vocab_config, translation_configs, awesome_person_id).unwrap_or_else(|err| {
         eprintln!("Problem processing word pairs: {}", err);
         process::exit(3);
     });

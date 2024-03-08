@@ -1,26 +1,51 @@
-use crate::dal::progress_stats::{DbProgressStatsRepository, ProgressStatsRepository};
-use crate::dal::translation_pair::{DbTranslationPairRepository, TranslationPairRepository};
-use crate::models::{ProgressStats, TranslationPair};
+use crate::dal::awesome_person::{DbAwesomePersonRepository, AwesomePersonRepository};
+use crate::models::{AwesomePerson, Vocab, VocabStudy};
 use chrono::Utc;
 use core::option::Option;
 use strsim::levenshtein;
+use crate::dal::vocab_study::{DbVocabStudyRepository, VocabStudyRepository};
 
 /// #[derive(Clone)]
 /// Represents the worst possible answer possible, and thus, it caps the distance.
 /// It is used in calculations as well.
 pub static MAX_DISTANCE: usize = 10;
 
-/// For simplicity, there is a single user so a single record for overall stats. This record is
-/// created as part of the database migration ran by Diesel Migration.
-/// TODO Add the ability to track more than one user.
-pub static PROGRESS_STATS_ID: i32 = 1;
-
 /// Once percentage correct get higher, the pair is to be marked known or even too easy.
-pub static FULLY_KNOWN_THRESHOLD: f64 = 0.98;
-pub static TOO_EASY_THRESHOLD: f64 = 0.998;
+pub static WELL_KNOWN_THRESHOLD: f64 = 0.98;
 
-pub trait LearnTranslationPairs {
-    fn get_study_pairs(&self, limit: i64) -> Result<Vec<TranslationPair>, String>;
+pub trait LearnVocab {
+
+    /// Retrieves a prioritized list of vocabulary sets for learning or review for a specified awesome person.
+    ///
+    /// This function queries the database to get a study set of vocabulary pairs for the given `awesome_id`.
+    /// It prioritizes vocabulary based on whether it has been tested before and if it is not marked as well known.
+    /// The result is a list of vocabulary pairs sorted to prioritize learning, with a limit on the number of pairs returned.
+    ///
+    /// # Parameters
+    ///
+    /// - `awesome_id`: The identifier of the awesome person for whom the vocabulary set is  being retrieved.
+    /// - `limit`: The maximum size of the vocabulary set to return.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing either:
+    /// - `Ok(Vec<(VocabStudy, Vocab)>)`: A vector of tuples, each containing a `VocabStudy` record
+    ///   and its corresponding `Vocab` record, limited by the specified `limit`.
+    /// - `Err(String)`: An error message string if the retrieval process fails.
+    ///
+    /// # Details
+    ///
+    /// The function first filters the vocabulary pairs to separate them into two groups based on their
+    /// learning priority. Then, it sorts the high-priority group by the `last_tested` date to prioritize
+    /// the most recently tested items. If the high-priority group contains fewer items than the specified limit,
+    /// additional pairs from the secondary group are added to the result set. The final list is then truncated
+    /// to meet the specified `limit` and reversed to ensure variety in presentation.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if:
+    /// - The retrieval of the study set from the database fails.
+    fn get_vocab_to_learn(&self, awesome_id: i32, limit: i64) -> Result<Vec<(VocabStudy, Vocab)>, String>;
 
     /// Evaluates the guessed word against potential correct answers, returning the "distance" from an exact match.
     ///
@@ -38,35 +63,35 @@ pub trait LearnTranslationPairs {
     /// # Returns
     ///
     /// The smallest Levenshtein distance between the guess and the set of possible correct answers, capped at a maximum of 10.
-    fn check_pair_match(
+    fn check_vocab_match(
         &self,
         learning_lang: &String,
         alternatives: &String,
         guess: &String,
     ) -> usize;
 
-    /// Updates the statistics for a specific translation pair based on the latest guess's distance from the correct answer.
+    /// Updates the statistics for a specific vocab based on the latest guess's distance from the correct answer.
     ///
-    /// This function retrieves the current statistics for a translation pair, calculates the new percentage of correctness
+    /// This function retrieves the current statistics for a vocab, calculates the new percentage of correctness
     /// based on the distance provided, updates the pair's stats including whether it's now considered fully known, and then
     /// saves these changes. It also updates global stats accordingly.
     ///
     /// # Parameters
     ///
-    /// * `pair_id` - The primary key (`id`) of the translation pair to update.
+    /// * `pair_id` - The primary key (`id`) of the vocab to update.
     /// * `distance` - The distance from the correct answer for the latest guess, where 0 indicates a perfect match.
     ///
     /// # Returns
     ///
     /// A `Result` containing either:
-    /// - `Ok(TranslationPair)`: The updated `TranslationPair` record.
+    /// - `Ok(Vocab)`: The updated `Vocab` record.
     /// - `Err(String)`: An error message string if the operation fails.
     ///
     /// # Errors
     ///
     /// Returns an error if there's an issue fetching the current pair stats, performing the calculation, updating the record in the database,
     /// or updating global progress stats. The error is returned as a `String` describing the failure.
-    fn update_pair_stats(&self, pair_id: i32, distance: usize) -> Result<TranslationPair, String>;
+    fn update_vocab_study_stats(&self, vocab_study_id: i32,  awesome_person_id: i32, distance: usize) -> Result<VocabStudy, String>;
 
     /// Updates the overall progress stats based on the latest quiz result.
     ///
@@ -92,9 +117,10 @@ pub trait LearnTranslationPairs {
     /// The error is returned as a `String` describing the failure.
     fn update_overall_progress(
         &self,
+        awesome_person_id: i32,
         correct: bool,
         last_fully_known: bool,
-    ) -> Result<ProgressStats, String>;
+    ) -> Result<AwesomePerson, String>;
 
     /// Calculates the new average correctness based on the previous correctness value and the distance
     /// of the latest guess. A distance of 0 indicates a perfect match and is given a heavier weighting
@@ -114,87 +140,96 @@ pub trait LearnTranslationPairs {
     /// matches.
     fn calc_correctness(&self, previous: f64, distance: usize) -> f64;
 
-    /// Constructs a translation prompt string for a given translation pair.
+    /// Constructs a translation prompt string for a given vocab.
     ///
     /// This function generates a prompt string to display to the user, based on the provided
-    /// `TranslationPair`. The basic prompt format includes the phrase "Translate: 'first_lang'",
-    /// where `first_lang` is replaced with the `first_lang` field of the `TranslationPair`.
+    /// `Vocab`. The basic prompt format includes the phrase "Translate: 'first_lang'",
+    /// where `first_lang` is replaced with the `first_lang` field of the `Vocab`.
     ///
-    /// If the `TranslationPair` has a non-empty `hint` field, the hint is appended to the prompt
-    /// with the format "hint: hint_value". Similarly, if the `TranslationPair` has a non-empty
+    /// If the `Vocab` has a non-empty `hint` field, the hint is appended to the prompt
+    /// with the format "hint: hint_value". Similarly, if the `Vocab` has a non-empty
     /// `pos` (part of speech) field, it is appended with the format "pos: pos_value".
     ///
     /// # Arguments
     ///
-    /// * `pair` - A `TranslationPair` instance containing the data to construct the prompt.
+    /// * `vocab` - A `Vocab` instance containing the data to construct the prompt.
+    /// * `user_notes` - Any user entered notes to help them with this vocab.
     ///
     /// # Returns
     ///
     /// Returns a `String` representing the constructed prompt for translation.
-    fn determine_prompt(&self, pair: TranslationPair) -> String;
+    fn determine_prompt(&self, vocab: &Vocab, user_notes: &str) -> String;
 }
 
-pub struct LearnTranslationPairsFuzzyMatch {
+pub struct VocabFuzzyMatch {
     // Directly store the Box<dyn ProgressStatsRepository>
-    process_repo: Box<dyn ProgressStatsRepository>,
-    pair_repo: Box<dyn TranslationPairRepository>,
+    awesome_person_repo: Box<dyn AwesomePersonRepository>,
+    vocab_study_repo: Box<dyn VocabStudyRepository>,
 }
 
-pub fn create_fuzzy_match_service() -> Box<dyn LearnTranslationPairs + 'static> {
-    let progress_repo = Box::new(DbProgressStatsRepository);
-    let pair_repo = Box::new(DbTranslationPairRepository);
-    Box::new(LearnTranslationPairsFuzzyMatch::new(
-        progress_repo,
-        pair_repo,
+pub fn create_fuzzy_match_service() -> Box<dyn LearnVocab + 'static> {
+    let awesome_person_repo = Box::new(DbAwesomePersonRepository);
+    let vocab_study_repo = Box::new(DbVocabStudyRepository);
+    Box::new(VocabFuzzyMatch::new(
+        awesome_person_repo,
+        vocab_study_repo,
     ))
 }
 
-impl LearnTranslationPairsFuzzyMatch {
-    // The constructor now directly takes Box<dyn ProgressStatsRepository>
-    // No need for a lifetime parameter
+impl VocabFuzzyMatch {
+    // The constructor takes Box<dyn Repos>
     pub fn new(
-        process_repo: Box<dyn ProgressStatsRepository>,
-        pair_repo: Box<dyn TranslationPairRepository>,
+        awesome_person_repo: Box<dyn AwesomePersonRepository>,
+        vocab_study_repo: Box<dyn VocabStudyRepository>,
     ) -> Self {
-        LearnTranslationPairsFuzzyMatch {
-            process_repo,
-            pair_repo,
+        VocabFuzzyMatch {
+            awesome_person_repo,
+            vocab_study_repo,
         }
     }
 }
 
-/// An implementation of the LearnTranslationPairs service. It uses fuzzy logic to check word
-/// matching then uses the distance from a perfect match to decide how to change the pair's
+/// An implementation of the LearnVocabs service. Using fuzzy logic to check word
+/// matching calculate the distance, The distance from a perfect match to decides how to change the vocab
 /// correctness.
-impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
-    fn get_study_pairs(&self, limit: i64) -> Result<Vec<TranslationPair>, String> {
-        let study_pairs = self.pair_repo.get_study_pairs()?;
+impl LearnVocab for VocabFuzzyMatch {
 
-        // Separate pairs into those that have been tested and those that have not.
-        let (mut study_list, not_tested): (Vec<_>, Vec<_>) = study_pairs.into_iter()
-            .partition(|l| l.last_tested.is_some());
+    /// Implementation, see trait for details [`LearnVocab::get_vocab_to_learn`]
+    ///
+    /// For advanced usage and mock implementations, please refer to
+    /// the integration tests in this module.
+    fn get_vocab_to_learn(&self, awesome_id: i32, limit: i64) -> Result<Vec<(VocabStudy, Vocab)>, String> {
+        let study_set = self.vocab_study_repo.get_study_set(awesome_id)?;
 
-        // Now sort the list by last_tested in ascending order giving a little time before presenting
-        // the last studied pair.
-        study_list.sort_by(|a, b| {
-            a.last_tested.clone().unwrap_or_default().cmp(&b.last_tested.clone().unwrap_or_default())
+        // Separate tuples into two groups for prioritization.
+        let (mut target_group, secondary_group): (Vec<_>, Vec<_>)
+            = study_set.into_iter()
+                .filter(|(_, v)| !v.first_lang.is_empty())
+                .partition(|(vs, _)| vs.last_tested.is_some() && !vs.well_known);
+
+        // Sorts the list by last_tested to find the most recently studied in the target group.
+        target_group.sort_by(|(a_study, _), (b_study, _)| {
+            b_study.last_tested.clone().unwrap_or_default().cmp(&a_study.last_tested.clone().unwrap_or_default())
         });
 
-        // Grab more pairs if the user has finished learning the already tested pairs.
-        if study_list.len() < limit as usize {
-            study_list.extend(not_tested.into_iter().take(limit as usize - study_list.len()));
+        // Grab more pairs from the secondary group as needed.
+        if target_group.len() < limit as usize {
+            target_group.extend(secondary_group.into_iter().take(limit as usize - target_group.len()));
         } else {
-            study_list.truncate(limit as usize);
+            target_group.truncate(limit as usize);
         }
 
-        Ok(study_list)
+        // Reverse the order to keep from presenting last word testing in the last set first in this set.
+        target_group.reverse();
+
+        Ok(target_group)
     }
 
-    /// Implementation, see trait for details [`LearnTranslationPairs::check_pair_match`]
+    /// Implementation, see trait for details [`LearnVocab::check_vocab_match`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the unit tests in this module.
-    fn check_pair_match(
+    fn check_vocab_match(
         &self,
         learning_lang: &String,
         alternatives: &String,
@@ -228,52 +263,60 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
         }
     }
 
-    /// Implementation, see trait for details [`LearnTranslationPairs::update_pair_stats`]
+    /// Implementation, see trait for details [`LearnVocab::update_vocab_study_stats`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the unit tests in this module.
-    fn update_pair_stats(&self, pair_id: i32, distance: usize) -> Result<TranslationPair, String> {
+    fn update_vocab_study_stats(&self, vocab_study_id: i32,
+                                awesome_person_id: i32,
+                                distance: usize) -> Result<VocabStudy, String> {
+
         let current = self
-            .pair_repo
-            .get_translation_pair_by_id(pair_id)
+            .vocab_study_repo
+            .get_vocab_study_by_id(vocab_study_id)
             .map_err(|err| err.to_string())?;
+
         let updated_percentage_correct =
             self.calc_correctness(current.percentage_correct.unwrap_or_default(), distance);
 
-        let updating = TranslationPair {
+        let last_change = updated_percentage_correct - current.percentage_correct.unwrap_or_default();
+
+        let updating = VocabStudy {
             percentage_correct: Option::from(updated_percentage_correct),
+            last_change: Option::from(last_change),
             last_tested: Option::from(Utc::now()),
-            fully_known: updated_percentage_correct > FULLY_KNOWN_THRESHOLD,
+            well_known: updated_percentage_correct > WELL_KNOWN_THRESHOLD,
             guesses: Option::from(current.guesses.unwrap_or_default() + 1),
             ..current
         };
 
         // Save changes to dal.
-        self.pair_repo
-            .update_translation_pair(updating)
+        self.vocab_study_repo
+            .update_vocab_study(updating)
             .map_err(|err| err.to_string())?;
         let updated = self
-            .pair_repo
-            .get_translation_pair_by_id(pair_id)
+            .vocab_study_repo
+            .get_vocab_study_by_id(vocab_study_id)
             .map_err(|err| err.to_string())?;
 
         // Update the global stats too.
-        self.update_overall_progress(distance == 0, updated.fully_known.clone())?;
+        self.update_overall_progress(awesome_person_id, distance == 0, updated.well_known.clone())?;
         Ok(updated)
     }
 
-    /// Implementation, see trait for details [`LearnTranslationPairs::update_overall_progress`]
+    /// Implementation, see trait for details [`LearnVocab::update_overall_progress`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the unit tests in this module.
     fn update_overall_progress(
         &self,
+        awesome_person_id: i32,
         correct: bool,
         last_fully_known: bool,
-    ) -> Result<ProgressStats, String> {
+    ) -> Result<AwesomePerson, String> {
         let current = self
-            .process_repo
-            .get_progress_stats_by_id(PROGRESS_STATS_ID)
+            .awesome_person_repo
+            .get_awesome_person_by_id(awesome_person_id)
             .map_err(|err| err.to_string())?;
 
         // Increment counters based on whether the answer was correct
@@ -286,7 +329,7 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
         let total_percentage = num_correct as f64 / (num_correct + num_incorrect) as f64;
 
         // Prepare the updated stats
-        let updating = ProgressStats {
+        let updating = AwesomePerson {
             num_known: if last_fully_known { Some(current.num_known.unwrap_or(0) + 1) } else { current.num_known },
             num_correct: Some(num_correct),
             num_incorrect: Some(num_incorrect),
@@ -296,11 +339,14 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
         };
 
         // Update the stats and return the updated record
-        self.process_repo.update_progress_stats(updating).map_err(|err| err.to_string())?;
-        self.process_repo.get_progress_stats_by_id(PROGRESS_STATS_ID).map_err(|err| err.to_string())
+        self.awesome_person_repo.update_awesome_person(updating)
+            .map_err(|err| err.to_string())?;
+        
+        self.awesome_person_repo.get_awesome_person_by_id(awesome_person_id)
+            .map_err(|err| err.to_string())
     }
 
-    /// Implementation, see trait for details [`LearnTranslationPairs::calc_correctness`]
+    /// Implementation, see trait for details [`LearnVocab::calc_correctness`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the unit tests in this module.
@@ -316,22 +362,22 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
         score
     }
 
-    /// Implementation, see trait for details [`LearnTranslationPairs::determine_prompt`]
+    /// Implementation, see trait for details [`LearnVocab::determine_prompt`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the unit tests in this module.
-    fn determine_prompt(&self, pair: TranslationPair) -> String {
-        let mut prompt = format!("Translate: '{}'",  &pair.first_lang);
-        if !pair.hint.clone().unwrap_or_default().is_empty() {
-            prompt =  format!("{}    hint: {}",  prompt, &pair.hint.unwrap_or_default());
+    fn determine_prompt(&self, vocab: &Vocab, user_notes: &str) -> String {
+        let mut prompt = format!("Translate: '{}'",  &vocab.first_lang);
+        if !vocab.hint.clone().unwrap_or_default().is_empty() {
+            prompt =  format!("{}    hint: {}",  prompt, vocab.hint.clone().unwrap_or_default());
         }
 
-        if !pair.pos.clone().unwrap_or_default().is_empty() {
-            prompt =  format!("{}    pos: {}",  prompt, &pair.pos.unwrap_or_default());
+        if !vocab.pos.clone().unwrap_or_default().is_empty() {
+            prompt =  format!("{}    pos: {}",  prompt, vocab.pos.clone().unwrap_or_default());
         }
 
-        if !pair.user_notes.clone().unwrap_or_default().is_empty() {
-            prompt =  format!("{}    your notes: {}",  prompt, &pair.user_notes.unwrap_or_default());
+        if !user_notes.is_empty() {
+            prompt =  format!("{}    your notes: {}",  prompt, user_notes);
         }
 
         prompt
@@ -340,102 +386,8 @@ impl LearnTranslationPairs for LearnTranslationPairsFuzzyMatch {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_fixtures::fixture_setup;
     use super::*;
-    use crate::models::NewTranslationPair;
-    use diesel::result::Error as DieselError;
-
-    // Mock-up functions to simulate actual function behaviors
-    pub struct MockProgressStatsRepository;
-    impl ProgressStatsRepository for MockProgressStatsRepository {
-        fn get_progress_stats_by_id(&self, stats_id: i32) -> Result<ProgressStats, DieselError> {
-            Ok(ProgressStats {
-                id: stats_id,
-                num_known: Some(100),
-                num_correct: Some(80),
-                num_incorrect: Some(20),
-                total_percentage: Some(0.8),
-                updated: chrono::Utc::now(),
-            })
-        }
-        fn update_progress_stats(&self, _: ProgressStats) -> Result<usize, String> {
-            Ok(1) // Simulate successful update of one record
-        }
-    }
-
-    // Mock struct for TranslationPairRepository
-    pub struct MockTranslationPairRepository;
-
-    // Mock implementation of TranslationPairRepository
-    impl TranslationPairRepository for MockTranslationPairRepository {
-        fn get_translation_pair_by_id(&self, pair_id: i32) -> Result<TranslationPair, DieselError> {
-            // Mock behavior: Return an Ok result with a dummy TranslationPair
-            Ok(TranslationPair {
-                id: pair_id,
-                learning_lang: "Example language".to_string(),
-                first_lang: "Example first language".to_string(),
-                percentage_correct: Some(1.0),
-                ..Default::default()
-            })
-        }
-
-        fn find_translation_pair_by_learning_language(
-            &self,
-            learning_lang_search: String,
-        ) -> Result<Option<TranslationPair>, DieselError> {
-            // Mock behavior: Return Some(TranslationPair) or None based on a condition
-            Ok(Some(TranslationPair {
-                id: 1,
-                learning_lang: learning_lang_search,
-                first_lang: "Example first language".to_string(),
-                percentage_correct: Some(1.0),
-                ..Default::default()
-            }))
-        }
-
-        fn find_translation_pair_by_alternative(
-            &self,
-            _alternative_search: String,
-        ) -> Result<Option<TranslationPair>, DieselError> {
-            todo!()
-        }
-
-        fn get_empty_first_lang_pairs(&self, _limit: i64) -> Result<Vec<TranslationPair>, String> {
-            // Mock behavior: Return an empty Vec or a Vec with dummy TranslationPairs
-            Ok(vec![])
-        }
-
-        fn get_study_pairs(&self) -> Result<Vec<TranslationPair>, String> {
-            // Mock behavior: Return a Vec with a limited number of dummy TranslationPairs
-            Ok(vec![
-                TranslationPair {
-                    id: 1,
-                    learning_lang: "Study language".to_string(),
-                    first_lang: "Study first language".to_string(),
-                    percentage_correct: Some(0.5),
-                    ..Default::default()
-                }
-            ])
-        }
-
-        fn create_translation_pair(
-            &self,
-            new_translation_pair: &NewTranslationPair,
-        ) -> Result<TranslationPair, String> {
-            // Mock behavior: Return an Ok result with a newly "created" TranslationPair
-            Ok(TranslationPair {
-                id: 2, // Simulate that a new ID was assigned
-                learning_lang: new_translation_pair.learning_lang.clone(),
-                first_lang: new_translation_pair.first_lang.clone(),
-                percentage_correct: new_translation_pair.percentage_correct,
-                ..Default::default()
-            })
-        }
-
-        fn update_translation_pair(&self, _updating: TranslationPair) -> Result<usize, String> {
-            // Mock behavior: Return Ok(1) to simulate a successful update
-            Ok(1)
-        }
-    }
 
     #[test]
     fn unit_test_fuzzy_pair_match() {
@@ -449,15 +401,10 @@ mod tests {
             // (learning_lang, alternatives, guess, expected)
         ];
 
-        let progress_repo = Box::new(MockProgressStatsRepository);
-        let pair_repo = Box::new(MockTranslationPairRepository);
-        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
-            progress_repo,
-            pair_repo,
-        ));
+        let fuzzy_service = fixture_setup().fuzzy_service;
 
         for (learning_lang, alternatives, guess, expected) in test_cases {
-            let result = fuzzy_service.check_pair_match(
+            let result = fuzzy_service.check_vocab_match(
                 &learning_lang.to_string(),
                 &alternatives.to_string(),
                 &guess.to_string(),
@@ -482,12 +429,7 @@ mod tests {
 
         let tolerance = 0.01; // Define a suitable tolerance for the comparison of floats
 
-        let progress_repo = Box::new(MockProgressStatsRepository);
-        let pair_repo = Box::new(MockTranslationPairRepository);
-        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
-            progress_repo,
-            pair_repo,
-        ));
+        let fuzzy_service = fixture_setup().fuzzy_service;
 
         for (previous, distance, expected) in test_cases {
             let result = fuzzy_service.calc_correctness(previous, distance);
@@ -504,12 +446,7 @@ mod tests {
         let previous_correctness = 0.75; // 75% correctness prior to the latest guess
         let distance_for_latest_guess = 2; // The guess was fairly close, but not perfect
 
-        let progress_repo = Box::new(MockProgressStatsRepository);
-        let pair_repo = Box::new(MockTranslationPairRepository);
-        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
-            progress_repo,
-            pair_repo,
-        ));
+        let fuzzy_service = fixture_setup().fuzzy_service;
 
         let new_correctness =
             fuzzy_service.calc_correctness(previous_correctness, distance_for_latest_guess);
@@ -527,15 +464,12 @@ mod tests {
 
     #[test]
     fn unit_test_update_overall_progress() {
-        let progress_repo = Box::new(MockProgressStatsRepository);
-        let pair_repo = Box::new(MockTranslationPairRepository);
-        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
-            progress_repo,
-            pair_repo,
-        ));
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        let awesome_person_id = 1;
         let correct = true;
         let last_fully_known = false;
-        match fuzzy_service.update_overall_progress(correct, last_fully_known) {
+        match fuzzy_service.update_overall_progress(awesome_person_id, correct, last_fully_known) {
             Ok(updated_progress) => println!("Updated progress stats: {}", updated_progress.id),
             Err(e) => println!("Error updating progress stats: {}", e),
         }
@@ -543,38 +477,29 @@ mod tests {
 
     #[test]
     fn unit_test_update_pair_stats() {
-        let pair_id = 1;
+        let vocab_study_id = 1;
+        let awesome_person_id = 1;
         let distance = 2; // The guess was close, but not perfect
 
-        let progress_repo = Box::new(MockProgressStatsRepository);
-        let pair_repo = Box::new(MockTranslationPairRepository);
-        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
-            progress_repo,
-            pair_repo,
-        ));
-        match fuzzy_service.update_pair_stats(pair_id, distance) {
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        match fuzzy_service.update_vocab_study_stats(vocab_study_id, awesome_person_id, distance) {
             Ok(updated_pair) => println!(
-                "Updated translation pair stats: {:?}, fully known: {}",
-                updated_pair.percentage_correct, updated_pair.fully_known
+                "Updated vocab stats: {:?}, well known: {}",
+                updated_pair.percentage_correct, updated_pair.well_known
             ),
-            Err(e) => println!("Error updating translation pair stats: {}", e),
+            Err(e) => println!("Error updating vocab stats: {}", e),
         }
     }
 
     #[test]
     fn unit_test_check_pair_match() {
-        let progress_repo = Box::new(MockProgressStatsRepository);
-        let pair_repo = Box::new(MockTranslationPairRepository);
-        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
-            progress_repo,
-            pair_repo,
-        ));
-
+        let fuzzy_service = fixture_setup().fuzzy_service;
         // Test a perfect guess
         let learning_lang = "La gata es muy inteligente".to_string(); // The word to learn
         let alternatives = "La felina es muy inteligente".to_string(); // Alternative correct answers
         let guess = learning_lang.clone(); // A perfect guess
-        let distance = fuzzy_service.check_pair_match(&learning_lang, &alternatives, &guess);
+        let distance = fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &guess);
         assert_eq!(
             distance, 0,
             "A perfect guess should return a distance of 0."
@@ -583,14 +508,14 @@ mod tests {
         // Demonstrating the effect of a close, but not perfect, guess
         let close_guess = "La gata es muy perezosa".to_string();
         let distance_for_close_guess =
-            fuzzy_service.check_pair_match(&learning_lang, &alternatives, &close_guess);
+            fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &close_guess);
         println!("Distance for a close guess: {}", distance_for_close_guess);
         // Expecting a small distance greater than 0 but less than MAX_DISTANCE
 
         // Demonstrating the effect of a guess with no similarity
         let no_similarity_guess = "This isn't even spanish!".to_string();
         let distance_for_no_similarity =
-            fuzzy_service.check_pair_match(&learning_lang, &alternatives, &no_similarity_guess);
+            fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &no_similarity_guess);
         assert_eq!(
             distance_for_no_similarity, MAX_DISTANCE,
             "A guess with no similarity should return the maximum distance."
@@ -599,65 +524,64 @@ mod tests {
 
     #[test]
     fn unit_test_determine_prompt() {
-        let progress_repo = Box::new(MockProgressStatsRepository);
-        let pair_repo = Box::new(MockTranslationPairRepository);
-        let fuzzy_service = Box::new(LearnTranslationPairsFuzzyMatch::new(
-            progress_repo,
-            pair_repo,
-        ));
+        let fuzzy_service = fixture_setup().fuzzy_service;
 
         // Define test cases
         let test_cases = vec![
             (
-                TranslationPair {
+                Vocab {
                     first_lang: "amor".to_string(),
                     hint: Some("noun".to_string()),
                     pos: Some("love".to_string()),
                     ..Default::default()
                 },
+                "",
                 "Translate: 'amor'    hint: noun    pos: love".to_string(),
             ),
             (
-                TranslationPair {
+                Vocab {
                     first_lang: "correr".to_string(),
                     hint: None,
                     pos: Some("verb".to_string()),
                     ..Default::default()
                 },
+                "",
                 "Translate: 'correr'    pos: verb".to_string(),
             ),
             (
-                TranslationPair {
+                Vocab {
                     first_lang: "amarillo".to_string(),
                     hint: Some("color".to_string()),
                     pos: None,
                     ..Default::default()
                 },
+                "",
                 "Translate: 'amarillo'    hint: color".to_string(),
             ),
             (
-                TranslationPair {
+                Vocab {
                     first_lang: "libro".to_string(),
                     hint: None,
                     pos: None,
                     ..Default::default()
                 },
+                "",
                 "Translate: 'libro'".to_string(),
             ),
             (
-                TranslationPair {
+                Vocab {
                     first_lang: "libro".to_string(),
-                    user_notes: Some("something you read".to_string()),
                     ..Default::default()
                 },
+                "something you read",
                 "Translate: 'libro'    your notes: something you read".to_string(),
             ),
         ];
 
         // Run test cases
-        for (pair, expected_prompt) in test_cases {
-            let prompt = fuzzy_service.determine_prompt(pair);
-            assert_eq!(prompt, expected_prompt, "Prompt did not match expected value for TranslationPair");
+        for (pair, user_notes, expected_prompt) in test_cases {
+            let prompt = fuzzy_service.determine_prompt(&pair, user_notes);
+            assert_eq!(prompt, expected_prompt, "Prompt did not match expected value for Vocab");
         }
 
     }

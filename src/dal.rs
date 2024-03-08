@@ -1,4 +1,5 @@
 pub mod db_connection;
 pub mod file_access;
-pub mod progress_stats;
-pub mod translation_pair;
+pub mod awesome_person;
+pub mod vocab;
+pub(crate) mod vocab_study;
