@@ -8,7 +8,7 @@ use diesel::{QueryDsl, RunQueryDsl};
 ///
 /// This trait abstracts the operations related to fetching and updating records, allowing for
 /// different implementations including ones suitable for testing with mock data.
-pub trait AwesomePersonRepository {
+pub trait AwesomePersonRepository: Send + Sync {
     /// Retrieves a single awesome person record by its primary key.
     ///
     /// # Parameters

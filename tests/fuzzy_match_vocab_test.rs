@@ -1,7 +1,7 @@
 use palabras::config::{TranslationsConfig, VocabConfig};
 use palabras::dal::db_connection::verify_connection_migrate_db;
 use palabras::dal::vocab::{DbVocabRepository, VocabRepository};
-use palabras::sl::study_vocab::create_fuzzy_match_service;
+use palabras::sl::fuzzy_match_vocab::{LearnVocab, VocabFuzzyMatch};
 use palabras::sl::sync_vocab::import_duo_vocab;
 
 /// Tests the duo lingo import by loading it into the test database.
@@ -49,9 +49,27 @@ fn test_study_vocab_with_import() {
     check_vocab_expectations("visito".to_string(), "I visit".to_string());
 
     // Now the real test starts
-    let match_service = create_fuzzy_match_service();
-    let study_set = match_service.get_vocab_to_learn(awesome_person_id, 10).expect("Expect vocab request to work");
-    assert!(study_set.len() >= 4, "Expected at least our 4, they may not be ours though")
+    let match_service = VocabFuzzyMatch::instance();
+    let study_set
+        = match_service
+        .get_vocab_to_learn(awesome_person_id, i64::MAX)
+        .expect("Expect vocab request to work");
+
+    assert!(study_set.len() >= 4, "Expected at least 4, there may be others");
+
+    let (_, quedan_v)
+        = study_set
+            .into_iter()
+            .find(|(_, v)| v.learning_lang.eq("quedan"))
+            .expect("Should have found 'quedan'");
+
+    // Check a perfect match
+    let distance = match_service
+        .check_vocab_match(
+            &quedan_v.learning_lang,
+            &quedan_v.alternatives.unwrap_or_default(),
+            &quedan_v.learning_lang);
+    assert_eq!(distance, 0, "Should have match and therefore been 0")
 }
 
 /// Checks that vocab loaded

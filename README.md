@@ -25,10 +25,20 @@ To update the project:
 # For Developers
 [Developer Setup](docs/developers.md)
 
-# Running
+# Running the CLI
+A database connection is required, see [DB Setup](docs/db.md)
 > cargo run --bin shell_study
 
-_Note: This is only a command line interface for now_
+# Running the GQL Server
+
+Make certain you set up your TCP Address to be used.
+A database connection is required, see [DB Setup](docs/db.md)
+> export SERVER_ADDR=0.0.0.0:3000
+> cargo run
+
+_Note: This is the early days of the gql server, changes are extremely likely_
+
+The GraphiQL IDE can be found on the root TCP Address
 
 # Releasing
 > cargo build --release

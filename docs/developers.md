@@ -18,11 +18,11 @@ diesel migration redo # to test the drops, optional
 diesel migration generate <migration_name>
 source .env
 diesel migration run
-diesel print-schema > src/schema.rs
+diesel print-schema > src/studies
 source test.env  # to run tests
 ```
 
 To update the diesel schema to match the database
 ```zsh
-diesel print-schema > src/schema.rs
+diesel print-schema > src/studies
 ```
