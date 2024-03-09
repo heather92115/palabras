@@ -18,7 +18,7 @@ diesel migration redo # to test the drops, optional
 diesel migration generate <migration_name>
 source .env
 diesel migration run
-diesel print-schema > src/schemas.rs
+diesel print-schema > src/schema.rs
 source test.env  # to run tests
 ```
 
