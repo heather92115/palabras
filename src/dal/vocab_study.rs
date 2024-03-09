@@ -15,7 +15,7 @@ use diesel::{RunQueryDsl};
 ///
 /// This trait abstracts the operations related to fetching and updating vocab study records, allowing for
 /// different implementations including ones suitable for testing with mock data.
-pub trait VocabStudyRepository {
+pub trait VocabStudyRepository: Send + Sync {
     ///
     /// Gets a single vocab study using its primary key.
     ///

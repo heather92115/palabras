@@ -8,17 +8,22 @@ default-run = "palabras"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = "0.4.34"
-diesel = { version = "2.1.4", features = ["postgres", "r2d2", "chrono", "serde_json"] }
-diesel_migrations = "2.1.0"
-dotenv = "0.15.0"
-html-entities = "0.1.0-1"
-lazy_static = { version = "1.4.0" }
+async-graphql = "7.0"
+async-graphql-axum = "7.0"
+axum = { version = "0.7", features = ["tracing", "ws"] }
+chrono = "0.4"
+diesel = { version = "2.1", features = ["postgres", "r2d2", "chrono", "serde_json"] }
+diesel_migrations = "2.1"
+dotenv = "0.15"
+html-entities = "0.1"
+lazy_static = { version = "1.4" }
+num_cpus = "1.16"
 rand = "0.9.0-alpha.0"
-regex = "1.10.3"
-reqwest = { version = "0.11.24", features = ["blocking"] }
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.114"
-strsim = "0.11.0"
-tokio = { version = "1.36.0", features = ["full", "test-util"] }
-tracing-subscriber = "0.3.18"
+regex = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+strsim = "0.11"
+tokio = { version = "1.36", features = ["full", "test-util", "macros", "rt-multi-thread"] }
+tower = { version = "0.4", features = ["util"] }
+tower-http = { version = "0.5", features = ["timeout", "trace"] }
+tracing-subscriber = "0.3"

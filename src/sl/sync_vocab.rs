@@ -5,7 +5,7 @@ use crate::dal::file_access::{
 use crate::dal::vocab::{DbVocabRepository, VocabRepository};
 use crate::dal::vocab_study::{DbVocabStudyRepository, VocabStudyRepository};
 use crate::models::{NewVocab, NewVocabStudy, Vocab, VocabStudy};
-use crate::sl::study_vocab::{WELL_KNOWN_THRESHOLD};
+use crate::sl::fuzzy_match_vocab::{WELL_KNOWN_THRESHOLD};
 use diesel::result::Error as DieselError;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -507,7 +507,7 @@ pub fn sync_vocab_study(vocab_id: i32, awesome_person_id: i32, percentage: f64) 
                 .map_err(|err| err.to_string())?;
         }
     } else {
-        // This user doesn't already have a mapping to the vocab so it
+        // This user doesn't already have a mapping to the vocab, so it
         // needs to be added.
         create_vocab_study(vocab_id, awesome_person_id, percentage)
             .map_err(|err| err.to_string())?;
@@ -518,7 +518,7 @@ pub fn sync_vocab_study(vocab_id: i32, awesome_person_id: i32, percentage: f64) 
 
 // Creating a mutex to guard the complex logic within process_duo_vocab
 lazy_static! {
-    static ref PROCESS_MUTEX: Mutex<()> = Mutex::new(());
+    static ref PROCESS_IMPORT_MUTEX: Mutex<()> = Mutex::new(());
 }
 
 /// Processes vocabulary data and integrates it into the database.
@@ -574,7 +574,7 @@ fn process_duo_vocab(
     awesome_id: i32
 ) -> Result<(), String> {
     // Acquire the lock before proceeding with import and updates.
-    let _lock = PROCESS_MUTEX.lock().map_err(|e| e.to_string())?;
+    let _lock = PROCESS_IMPORT_MUTEX.lock().map_err(|e| e.to_string())?;
 
     // Get the dal repo for translation pairs. It requires a database connection.
     let vocab_repo = DbVocabRepository;

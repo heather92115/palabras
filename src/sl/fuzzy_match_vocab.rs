@@ -2,7 +2,10 @@ use crate::dal::awesome_person::{DbAwesomePersonRepository, AwesomePersonReposit
 use crate::models::{AwesomePerson, Vocab, VocabStudy};
 use chrono::Utc;
 use core::option::Option;
+use std::sync::{Mutex, MutexGuard};
+use lazy_static::lazy_static;
 use strsim::levenshtein;
+use crate::dal::vocab::{DbVocabRepository, VocabRepository};
 use crate::dal::vocab_study::{DbVocabStudyRepository, VocabStudyRepository};
 
 /// #[derive(Clone)]
@@ -47,6 +50,54 @@ pub trait LearnVocab {
     /// - The retrieval of the study set from the database fails.
     fn get_vocab_to_learn(&self, awesome_id: i32, limit: i64) -> Result<Vec<(VocabStudy, Vocab)>, String>;
 
+    /// Constructs a translation prompt string for a given vocab.
+    ///
+    /// This function generates a prompt string to display to the user, based on the provided
+    /// `Vocab`. The basic prompt format includes the phrase "Translate: 'first_lang'",
+    /// where `first_lang` is replaced with the `first_lang` field of the `Vocab`.
+    ///
+    /// If the `Vocab` has a non-empty `hint` field, the hint is appended to the prompt
+    /// with the format "hint: hint_value". Similarly, if the `Vocab` has a non-empty
+    /// `pos` (part of speech) field, it is appended with the format "pos: pos_value".
+    ///
+    /// # Arguments
+    ///
+    /// * `vocab` - A `Vocab` instance containing the data to construct the prompt.
+    /// * `user_notes` - Any user entered notes to help them with this vocab.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `String` representing the constructed prompt for translation.
+    fn determine_prompt(&self, vocab: &Vocab, user_notes: &str) -> String;
+
+    /// Checks the provided response against the correct answer for a given vocabulary item and updates statistics accordingly.
+    ///
+    /// This function takes the identifiers for a vocabulary item and its study record, along with the user's response,
+    /// to perform a fuzzy match checking how close the response is to the correct answer. It updates both the specific vocabulary
+    /// study statistics and the overall progress statistics for the awesome person associated with the vocab study.
+    ///
+    /// # Parameters
+    /// - `vocab_id`: The identifier for the vocabulary item being studied.
+    /// - `vocab_study_id`: The identifier for the vocabulary study record.
+    /// - `response`: The user's response as a `String`.
+    ///
+    /// # Returns
+    /// - `Ok(String)`: A string indicating the result of the match. Can provide feedback such as a perfect match, close match, or incorrect match.
+    /// - `Err(String)`: An error message if any step in the process fails.
+    ///
+    /// # Errors
+    /// This function returns an error if:
+    /// - It fails to retrieve the vocabulary item based on the provided `vocab_id`.
+    /// - There are issues updating the vocabulary study statistics or the overall progress.
+    ///
+    /// This function is intended to be used as part of a vocabulary learning application where users are presented
+    /// with vocabulary words to translate or identify. The function assesses the accuracy of their responses and
+    /// updates their learning progress accordingly.
+    fn check_response(&self,
+                      vocab_id: i32,
+                      vocab_study_id: i32,
+                      response: String) -> Result<String, String>;
+
     /// Evaluates the guessed word against potential correct answers, returning the "distance" from an exact match.
     ///
     /// This function considers both the primary `learning_lang` string and any additional `alternatives` as possible correct answers.
@@ -78,7 +129,7 @@ pub trait LearnVocab {
     ///
     /// # Parameters
     ///
-    /// * `pair_id` - The primary key (`id`) of the vocab to update.
+    /// * `vocab_study_id` - The primary key (`id`) of the vocab to update.
     /// * `distance` - The distance from the correct answer for the latest guess, where 0 indicates a perfect match.
     ///
     /// # Returns
@@ -91,7 +142,25 @@ pub trait LearnVocab {
     ///
     /// Returns an error if there's an issue fetching the current pair stats, performing the calculation, updating the record in the database,
     /// or updating global progress stats. The error is returned as a `String` describing the failure.
-    fn update_vocab_study_stats(&self, vocab_study_id: i32,  awesome_person_id: i32, distance: usize) -> Result<VocabStudy, String>;
+    fn update_vocab_study_stats(&self, vocab_study_id: i32,  distance: usize) -> Result<VocabStudy, String>;
+
+    /// Calculates the new average correctness based on the previous correctness value and the distance
+    /// of the latest guess. A distance of 0 indicates a perfect match and is given a heavier weighting
+    /// in the calculation to favor accuracy.
+    ///
+    /// # Parameters
+    ///
+    /// * `previous` - The previous correctness percentage as a floating point number where 1.0
+    ///   represents 100% correctness.
+    /// * `distance` - The distance from the correct answer for the latest guess, where 0 indicates
+    ///   a perfect match.
+    ///
+    /// # Returns
+    ///
+    /// The new correctness percentage as a floating point number. This represents the averaged
+    /// correctness taking into account the latest guess and applying a heavier weight to perfect
+    /// matches.
+    fn calc_correctness(&self, previous: f64, distance: usize) -> f64;
 
     /// Updates the overall progress stats based on the latest quiz result.
     ///
@@ -122,58 +191,41 @@ pub trait LearnVocab {
         last_fully_known: bool,
     ) -> Result<AwesomePerson, String>;
 
-    /// Calculates the new average correctness based on the previous correctness value and the distance
-    /// of the latest guess. A distance of 0 indicates a perfect match and is given a heavier weighting
-    /// in the calculation to favor accuracy.
+    /// Determines the match prompt based on the distance between the correct answer and the user's response.
+    ///
+    /// This function takes the correct answer, the user's response, and the Levenshtein distance between them.
+    /// It returns a string indicating the quality of the match.
     ///
     /// # Parameters
-    ///
-    /// * `previous` - The previous correctness percentage as a floating point number where 1.0
-    ///   represents 100% correctness.
-    /// * `distance` - The distance from the correct answer for the latest guess, where 0 indicates
-    ///   a perfect match.
+    /// - `correct`: The correct answer as a string slice.
+    /// - `user_response`: The user's response as a string slice.
+    /// - `distance`: The Levenshtein distance between the correct answer and the user's response, as an usize.
     ///
     /// # Returns
-    ///
-    /// The new correctness percentage as a floating point number. This represents the averaged
-    /// correctness taking into account the latest guess and applying a heavier weight to perfect
-    /// matches.
-    fn calc_correctness(&self, previous: f64, distance: usize) -> f64;
-
-    /// Constructs a translation prompt string for a given vocab.
-    ///
-    /// This function generates a prompt string to display to the user, based on the provided
-    /// `Vocab`. The basic prompt format includes the phrase "Translate: 'first_lang'",
-    /// where `first_lang` is replaced with the `first_lang` field of the `Vocab`.
-    ///
-    /// If the `Vocab` has a non-empty `hint` field, the hint is appended to the prompt
-    /// with the format "hint: hint_value". Similarly, if the `Vocab` has a non-empty
-    /// `pos` (part of speech) field, it is appended with the format "pos: pos_value".
-    ///
-    /// # Arguments
-    ///
-    /// * `vocab` - A `Vocab` instance containing the data to construct the prompt.
-    /// * `user_notes` - Any user entered notes to help them with this vocab.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `String` representing the constructed prompt for translation.
-    fn determine_prompt(&self, vocab: &Vocab, user_notes: &str) -> String;
+    /// A `String` that provides feedback on how close the user's response was to the correct answer.
+    /// - Returns "Perfect Match!" if the distance is 0.
+    /// - Returns "Close, it was '[correct]', you entered '[user_response]'" if the distance is 3 or less.
+    /// - Otherwise, returns "It was '[correct]', you entered '[user_response]'".
+    fn determine_match_prompt(&self,
+                              correct: &str,
+                              user_response: &str,
+                              distance: usize) -> String;
 }
 
 pub struct VocabFuzzyMatch {
-    // Directly store the Box<dyn ProgressStatsRepository>
     awesome_person_repo: Box<dyn AwesomePersonRepository>,
     vocab_study_repo: Box<dyn VocabStudyRepository>,
+    vocab_repo: Box<dyn VocabRepository>,
 }
 
-pub fn create_fuzzy_match_service() -> Box<dyn LearnVocab + 'static> {
-    let awesome_person_repo = Box::new(DbAwesomePersonRepository);
-    let vocab_study_repo = Box::new(DbVocabStudyRepository);
-    Box::new(VocabFuzzyMatch::new(
-        awesome_person_repo,
-        vocab_study_repo,
-    ))
+lazy_static! {
+    static ref FUZZY_MATCH_SERVICE: Mutex<VocabFuzzyMatch> = Mutex::new(
+        VocabFuzzyMatch::new(
+            Box::new(DbAwesomePersonRepository),
+            Box::new(DbVocabStudyRepository),
+            Box::new(DbVocabRepository),
+        )
+    );
 }
 
 impl VocabFuzzyMatch {
@@ -181,11 +233,18 @@ impl VocabFuzzyMatch {
     pub fn new(
         awesome_person_repo: Box<dyn AwesomePersonRepository>,
         vocab_study_repo: Box<dyn VocabStudyRepository>,
+        vocab_repo: Box<dyn VocabRepository>,
     ) -> Self {
         VocabFuzzyMatch {
             awesome_person_repo,
             vocab_study_repo,
+            vocab_repo,
         }
+    }
+
+    // Method to access the singleton instance, but one thread at a time
+    pub fn instance() -> MutexGuard<'static, VocabFuzzyMatch> {
+        FUZZY_MATCH_SERVICE.lock().unwrap()
     }
 }
 
@@ -197,8 +256,10 @@ impl LearnVocab for VocabFuzzyMatch {
     /// Implementation, see trait for details [`LearnVocab::get_vocab_to_learn`]
     ///
     /// For advanced usage and mock implementations, please refer to
-    /// the integration tests in this module.
+    /// the unit integration tests in this module.
     fn get_vocab_to_learn(&self, awesome_id: i32, limit: i64) -> Result<Vec<(VocabStudy, Vocab)>, String> {
+
+        // TODO limit the number of results returned by the db, perhaps with a MV.
         let study_set = self.vocab_study_repo.get_study_set(awesome_id)?;
 
         // Separate tuples into two groups for prioritization.
@@ -222,7 +283,57 @@ impl LearnVocab for VocabFuzzyMatch {
         // Reverse the order to keep from presenting last word testing in the last set first in this set.
         target_group.reverse();
 
+        // Returning a curated vocab lesson
         Ok(target_group)
+    }
+
+
+    /// Implementation, see trait for details [`LearnVocab::determine_prompt`]
+    ///
+    /// For advanced usage and mock implementations, please refer to
+    /// the unit tests in this module.
+    fn determine_prompt(&self, vocab: &Vocab, user_notes: &str) -> String {
+        let mut prompt = format!("Translate: '{}'",  &vocab.first_lang);
+        if !vocab.hint.clone().unwrap_or_default().is_empty() {
+            prompt =  format!("{}    hint: {}",  prompt, vocab.hint.clone().unwrap_or_default());
+        }
+
+        if !vocab.pos.clone().unwrap_or_default().is_empty() {
+            prompt =  format!("{}    pos: {}",  prompt, vocab.pos.clone().unwrap_or_default());
+        }
+
+        if !user_notes.is_empty() {
+            prompt =  format!("{}    your notes: {}",  prompt, user_notes);
+        }
+
+        prompt
+    }
+
+    /// Implementation, see trait for details [`LearnVocab::check_response`]
+    ///
+    /// For advanced usage and mock implementations, please refer to
+    /// the unit and integration tests for this module.
+    fn check_response(&self,
+                      vocab_id: i32,
+                      vocab_study_id: i32,
+                      response: String) -> Result<String, String> {
+
+        // Get the vocab containing the possible correct responses.
+        let vocab = self.vocab_repo.get_vocab_by_id(vocab_id).map_err(|e| e.to_string())?;
+
+        // Use the fuzzy matching logic to see how much "distance" the response, 0 is correct.
+        let distance = self.check_vocab_match(&vocab.learning_lang,
+                                              &vocab.alternatives.unwrap_or_default(),
+                                              &response);
+
+        // Update the awesome person's stats for this vocab word.
+        let vocab_study = self.update_vocab_study_stats(vocab_study_id, distance)?;
+
+        // Update the awesome person's overall status.
+        self.update_overall_progress(vocab_study.awesome_person_id, distance == 0, vocab_study.well_known.clone())?;
+
+        // For the response text to be displayed to the awesome person
+        Ok(self.determine_match_prompt(&vocab.learning_lang, &response, distance))
     }
 
     /// Implementation, see trait for details [`LearnVocab::check_vocab_match`]
@@ -268,7 +379,6 @@ impl LearnVocab for VocabFuzzyMatch {
     /// For advanced usage and mock implementations, please refer to
     /// the unit tests in this module.
     fn update_vocab_study_stats(&self, vocab_study_id: i32,
-                                awesome_person_id: i32,
                                 distance: usize) -> Result<VocabStudy, String> {
 
         let current = self
@@ -299,9 +409,23 @@ impl LearnVocab for VocabFuzzyMatch {
             .get_vocab_study_by_id(vocab_study_id)
             .map_err(|err| err.to_string())?;
 
-        // Update the global stats too.
-        self.update_overall_progress(awesome_person_id, distance == 0, updated.well_known.clone())?;
         Ok(updated)
+    }
+
+    /// Implementation, see trait for details [`LearnVocab::calc_correctness`]
+    ///
+    /// For advanced usage and mock implementations, please refer to
+    /// the unit tests in this module.
+    fn calc_correctness(&self, previous: f64, distance: usize) -> f64 {
+        let mut score =
+            ((MAX_DISTANCE as f64 - distance as f64) / MAX_DISTANCE as f64 + previous) / 2.0;
+
+        if distance == 0 {
+            // weights a perfect match as two perfect answers instead of one.
+            score = (2.0 + previous) / 3.0;
+        }
+
+        score
     }
 
     /// Implementation, see trait for details [`LearnVocab::update_overall_progress`]
@@ -346,41 +470,19 @@ impl LearnVocab for VocabFuzzyMatch {
             .map_err(|err| err.to_string())
     }
 
-    /// Implementation, see trait for details [`LearnVocab::calc_correctness`]
+    /// Implementation, see trait for details [`LearnVocab::determine_match_prompt`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the unit tests in this module.
-    fn calc_correctness(&self, previous: f64, distance: usize) -> f64 {
-        let mut score =
-            ((MAX_DISTANCE as f64 - distance as f64) / MAX_DISTANCE as f64 + previous) / 2.0;
+    fn determine_match_prompt(&self, correct: &str, user_response: &str, distance: usize) -> String {
 
-        if distance == 0 {
-            // weights a perfect match as two perfect answers instead of one.
-            score = (2.0 + previous) / 3.0;
-        }
-
-        score
-    }
-
-    /// Implementation, see trait for details [`LearnVocab::determine_prompt`]
-    ///
-    /// For advanced usage and mock implementations, please refer to
-    /// the unit tests in this module.
-    fn determine_prompt(&self, vocab: &Vocab, user_notes: &str) -> String {
-        let mut prompt = format!("Translate: '{}'",  &vocab.first_lang);
-        if !vocab.hint.clone().unwrap_or_default().is_empty() {
-            prompt =  format!("{}    hint: {}",  prompt, vocab.hint.clone().unwrap_or_default());
-        }
-
-        if !vocab.pos.clone().unwrap_or_default().is_empty() {
-            prompt =  format!("{}    pos: {}",  prompt, vocab.pos.clone().unwrap_or_default());
-        }
-
-        if !user_notes.is_empty() {
-            prompt =  format!("{}    your notes: {}",  prompt, user_notes);
-        }
-
-        prompt
+        return if distance == 0 {
+            "Perfect Match!".to_string()
+        } else if distance <= 3 {
+            format!("Close, it was '{}', you entered '{}'", correct, user_response)
+        } else {
+            format!("It was '{}', you entered '{}'", correct, user_response)
+        };
     }
 }
 
@@ -390,143 +492,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn unit_test_fuzzy_pair_match() {
-        let test_cases = vec![
-            ("comprendimos", "", "comprendimos", 0),
-            ("comprendimos", "", "", 10),
-            ("comprendimos", "entendemos, intiendemos", "comprendimos", 0),
-            ("comprendimos", "entendemos, intiendemos", "entendemos", 0),
-            ("comprendimos", "entendemos, intiendemos", "intiendemos", 0),
-            ("comprendimos", "entendemos, intiendemos", "intiendemo", 1),
-            // (learning_lang, alternatives, guess, expected)
-        ];
-
+    fn unit_test_get_vocab_to_learn() {
+        // get the mocked service complete with mocked repos data test data
         let fuzzy_service = fixture_setup().fuzzy_service;
-
-        for (learning_lang, alternatives, guess, expected) in test_cases {
-            let result = fuzzy_service.check_vocab_match(
-                &learning_lang.to_string(),
-                &alternatives.to_string(),
-                &guess.to_string(),
-            );
-            assert!(
-                result.le(&expected),
-                "Calculated distance was not as expected. Result: {}, Expected: {} for learning_lang: {}, alternatives: {}, guess: {}",
-                result, expected, &learning_lang, &alternatives, &guess
-            )
-        }
-    }
-
-    #[test]
-    fn unit_test_calc_correctness() {
-        let test_cases = vec![
-            (0.5, 0, 0.83),
-            (0.5, 2, 0.65),
-            (0.4, 6, 0.4),
-            (1.0, 10, 0.5),
-            // (previous, distance, expected)
-        ];
-
-        let tolerance = 0.01; // Define a suitable tolerance for the comparison of floats
-
-        let fuzzy_service = fixture_setup().fuzzy_service;
-
-        for (previous, distance, expected) in test_cases {
-            let result = fuzzy_service.calc_correctness(previous, distance);
-            assert!(
-                (result - expected).abs() < tolerance,
-                "Calculated correctness was not as expected. Result: {}, Expected: {} for previous: {}, distance: {}",
-                result, expected, previous, distance
-            );
-        }
-    }
-
-    #[test]
-    fn unit_test_update_correctness() {
-        let previous_correctness = 0.75; // 75% correctness prior to the latest guess
-        let distance_for_latest_guess = 2; // The guess was fairly close, but not perfect
-
-        let fuzzy_service = fixture_setup().fuzzy_service;
-
-        let new_correctness =
-            fuzzy_service.calc_correctness(previous_correctness, distance_for_latest_guess);
-        println!("New correctness: {:.2}", new_correctness);
-
-        // Demonstrating the effect of a perfect guess
-        let perfect_distance = 0; // A perfect guess
-        let new_correctness_with_perfect =
-            fuzzy_service.calc_correctness(previous_correctness, perfect_distance);
-        println!(
-            "New correctness with a perfect guess: {:.2}",
-            new_correctness_with_perfect
-        );
-    }
-
-    #[test]
-    fn unit_test_update_overall_progress() {
-        let fuzzy_service = fixture_setup().fuzzy_service;
-
-        let awesome_person_id = 1;
-        let correct = true;
-        let last_fully_known = false;
-        match fuzzy_service.update_overall_progress(awesome_person_id, correct, last_fully_known) {
-            Ok(updated_progress) => println!("Updated progress stats: {}", updated_progress.id),
-            Err(e) => println!("Error updating progress stats: {}", e),
-        }
-    }
-
-    #[test]
-    fn unit_test_update_pair_stats() {
-        let vocab_study_id = 1;
-        let awesome_person_id = 1;
-        let distance = 2; // The guess was close, but not perfect
-
-        let fuzzy_service = fixture_setup().fuzzy_service;
-
-        match fuzzy_service.update_vocab_study_stats(vocab_study_id, awesome_person_id, distance) {
-            Ok(updated_pair) => println!(
-                "Updated vocab stats: {:?}, well known: {}",
-                updated_pair.percentage_correct, updated_pair.well_known
-            ),
-            Err(e) => println!("Error updating vocab stats: {}", e),
-        }
-    }
-
-    #[test]
-    fn unit_test_check_pair_match() {
-        let fuzzy_service = fixture_setup().fuzzy_service;
-        // Test a perfect guess
-        let learning_lang = "La gata es muy inteligente".to_string(); // The word to learn
-        let alternatives = "La felina es muy inteligente".to_string(); // Alternative correct answers
-        let guess = learning_lang.clone(); // A perfect guess
-        let distance = fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &guess);
-        assert_eq!(
-            distance, 0,
-            "A perfect guess should return a distance of 0."
-        );
-
-        // Demonstrating the effect of a close, but not perfect, guess
-        let close_guess = "La gata es muy perezosa".to_string();
-        let distance_for_close_guess =
-            fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &close_guess);
-        println!("Distance for a close guess: {}", distance_for_close_guess);
-        // Expecting a small distance greater than 0 but less than MAX_DISTANCE
-
-        // Demonstrating the effect of a guess with no similarity
-        let no_similarity_guess = "This isn't even spanish!".to_string();
-        let distance_for_no_similarity =
-            fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &no_similarity_guess);
-        assert_eq!(
-            distance_for_no_similarity, MAX_DISTANCE,
-            "A guess with no similarity should return the maximum distance."
-        );
+        let result = fuzzy_service.get_vocab_to_learn(1,1)
+            .expect("No issues expected with mocked data");
+        assert!(result.len() >= 1, "Mocked data expected");
     }
 
     #[test]
     fn unit_test_determine_prompt() {
+
+        // Note: the mocked repos aren't used in this test
         let fuzzy_service = fixture_setup().fuzzy_service;
 
-        // Define test cases
+        // Define test cases to check the prompt is as expected
         let test_cases = vec![
             (
                 Vocab {
@@ -578,11 +558,191 @@ mod tests {
             ),
         ];
 
-        // Run test cases
+        // Run test cases. Note: the mocked db connections aren't used with this method.
         for (pair, user_notes, expected_prompt) in test_cases {
             let prompt = fuzzy_service.determine_prompt(&pair, user_notes);
             assert_eq!(prompt, expected_prompt, "Prompt did not match expected value for Vocab");
         }
+    }
 
+    #[test]
+    fn unit_test_fuzzy_pair_match() {
+        let test_cases = vec![
+            ("comprendimos", "", "comprendimos", 0),
+            ("comprendimos", "", "", 10),
+            ("comprendimos", "entendemos, intiendemos", "comprendimos", 0),
+            ("comprendimos", "entendemos, intiendemos", "entendemos", 0),
+            ("comprendimos", "entendemos, intiendemos", "intiendemos", 0),
+            ("comprendimos", "entendemos, intiendemos", "intiendemo", 1),
+            // (learning_lang, alternatives, guess, expected)
+        ];
+
+        // Note: the mocked repos aren't used in this test
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        for (learning_lang, alternatives, guess, expected) in test_cases {
+            let result = fuzzy_service.check_vocab_match(
+                &learning_lang.to_string(),
+                &alternatives.to_string(),
+                &guess.to_string(),
+            );
+            assert!(
+                result.le(&expected),
+                "Calculated distance was not as expected. Result: {}, Expected: {} for learning_lang: {}, alternatives: {}, guess: {}",
+                result, expected, &learning_lang, &alternatives, &guess
+            )
+        }
+    }
+
+    #[test]
+    fn unit_test_calc_correctness() {
+        let test_cases = vec![
+            (0.5, 0, 0.83),
+            (0.5, 2, 0.65),
+            (0.4, 6, 0.4),
+            (1.0, 10, 0.5),
+            // (previous, distance, expected)
+        ];
+
+        let tolerance = 0.01; // Define a suitable tolerance for the comparison of floats
+
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        for (previous, distance, expected) in test_cases {
+            let result = fuzzy_service.calc_correctness(previous, distance);
+            assert!(
+                (result - expected).abs() < tolerance,
+                "Calculated correctness was not as expected. Result: {}, Expected: {} for previous: {}, distance: {}",
+                result, expected, previous, distance
+            );
+        }
+    }
+
+    #[test]
+    fn unit_test_update_correctness() {
+        // Testing a miss, but the match was close
+        let previous_correctness = 0.99; // 99% correctness prior to the latest guess
+        let distance_for_latest_guess = 2; // The guess was fairly close, but not perfect
+
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        let new_correctness =
+            fuzzy_service.calc_correctness(previous_correctness, distance_for_latest_guess);
+        assert!(new_correctness < previous_correctness, "Expected correctness to go down");
+
+        // Demonstrating the effect of a perfect guess
+        let previous_correctness = 0.5; // 50% correctness prior to the latest guess
+        let perfect_distance = 0; // A perfect guess
+        let new_correctness =
+            fuzzy_service.calc_correctness(previous_correctness, perfect_distance);
+        assert!(new_correctness > previous_correctness, "Expected correctness to go up");
+
+        // Demonstrating a miss, but the guess was better than before
+        let previous_correctness = 0.3; // 50% correctness prior to the latest guess
+        let perfect_distance = 2; // A close guess
+        let new_correctness =
+            fuzzy_service.calc_correctness(previous_correctness, perfect_distance);
+        assert!(new_correctness > previous_correctness, "Expected correctness to go up even on miss");
+
+        // Demonstrating a perfect guess with a previous low correctness percentage
+        let previous_correctness = 0.1; // 50% correctness prior to the latest guess
+        let perfect_distance = 0; // A perfect guess
+        let new_correctness =
+            fuzzy_service.calc_correctness(previous_correctness, perfect_distance);
+        assert!(new_correctness > 0.5, "Expected correctness to to be above 0.5");
+    }
+
+    #[test]
+    fn unit_test_update_overall_progress() {
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        let awesome_person_id = 1;
+        let correct = true;
+        let last_fully_known = false;
+        match fuzzy_service.update_overall_progress(awesome_person_id, correct, last_fully_known) {
+            Ok(updated_progress) => println!("Updated progress stats: {}", updated_progress.id),
+            Err(e) => println!("Error updating progress stats: {}", e),
+        }
+    }
+
+    #[test]
+    fn unit_test_check_pair_match() {
+        let fuzzy_service = fixture_setup().fuzzy_service;
+        // Test a perfect guess
+        let learning_lang = "La gata es muy inteligente".to_string(); // The word to learn
+        let alternatives = "La felina es muy inteligente".to_string(); // Alternative correct answers
+        let guess = learning_lang.clone(); // A perfect guess
+        let distance = fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &guess);
+        assert_eq!(
+            distance, 0,
+            "A perfect guess should return a distance of 0."
+        );
+
+        // Demonstrating the effect of a close, but not perfect, guess
+        let close_guess = "La gata es muy perezosa".to_string();
+        let distance_for_close_guess =
+            fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &close_guess);
+        println!("Distance for a close guess: {}", distance_for_close_guess);
+        // Expecting a small distance greater than 0 but less than MAX_DISTANCE
+
+        // Demonstrating the effect of a guess with no similarity
+        let no_similarity_guess = "This isn't even spanish!".to_string();
+        let distance_for_no_similarity =
+            fuzzy_service.check_vocab_match(&learning_lang, &alternatives, &no_similarity_guess);
+        assert_eq!(
+            distance_for_no_similarity, MAX_DISTANCE,
+            "A guess with no similarity should return the maximum distance."
+        );
+    }
+
+    #[test]
+    fn unit_test_match_prompt() {
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        // (correct word, guessed, calculated distance, prompt)
+        let test_cases = vec![
+            ("palabra", "palabra", 0, "Perfect Match!"),
+            ("palabra", "palabre", 1, "Close, it was 'palabra', you entered 'palabre'"),
+            ("palabra", "idioma", 6, "It was 'palabra', you entered 'idioma'"),
+        ];
+
+        for (correct, guessed, distance, prompt) in test_cases {
+            let actual = fuzzy_service.determine_match_prompt(correct, guessed, distance);
+            assert!(actual.eq(prompt), "Expected {}, but got {} for parameters {}, {}, {}",
+                    correct, actual, guessed, distance, prompt);
+        }
+    }
+
+    #[test]
+    fn unit_test_check_response() {
+        let fuzzy_service = fixture_setup().fuzzy_service;
+
+        let vocab_test_data = fuzzy_service.vocab_repo.get_vocab_by_id(1)
+            .expect("Mocked repo should have returned an instance of vocab");
+
+        let vocab_study_test_data = fuzzy_service.vocab_study_repo.get_vocab_study_by_id(1)
+            .expect("Mocked repo should have returned an instance of vocab study");
+
+        // Test a perfect match
+        let match_prompt
+            = fuzzy_service.check_response(
+                vocab_test_data.id, vocab_study_test_data.id, vocab_test_data.learning_lang.clone())
+                    .expect("No error results expected fn check_response with mocked repos");
+        assert_eq!(match_prompt, "Perfect Match!", "Expected perfect match from mocked data, but actual prompt was {}", match_prompt);
+
+        // Test an inaccurate answer, '123'
+        let match_prompt
+            = fuzzy_service.check_response(
+            vocab_test_data.id, vocab_study_test_data.id, "123".to_string())
+            .expect("No error results expected fn check_response with mocked repos");
+        assert_ne!(match_prompt, "Perfect Match!", "Expected a miss from mocked data, but actual prompt was {}", match_prompt);
+
+        // Test a close but incorrect answer
+        let test_response = format!("{}a", vocab_test_data.learning_lang.clone());
+        let match_prompt
+            = fuzzy_service.check_response(
+            vocab_test_data.id, vocab_study_test_data.id, test_response)
+            .expect("No error results expected fn check_response with mocked repos");
+        assert_ne!(match_prompt, "Perfect Match!", "Expected a miss from mocked data, but actual prompt was {}", match_prompt);
     }
 }

@@ -1,6 +1,6 @@
 use dotenv::dotenv;
 use palabras::dal::db_connection::verify_connection_migrate_db;
-use palabras::sl::study_vocab::create_fuzzy_match_service;
+use palabras::sl::fuzzy_match_vocab::{LearnVocab, VocabFuzzyMatch};
 use std::error::Error;
 use std::io;
 use std::io::Write;
@@ -49,7 +49,7 @@ pub fn main() -> Result<(), Box<dyn Error>> {
 
     let awesome_person_id = 1; // todo make this not for just me
 
-    let match_service = create_fuzzy_match_service();
+    let match_service = VocabFuzzyMatch::instance();
     let study_set = match_service.get_vocab_to_learn(awesome_person_id, 10)?;
     for (vocab_study, vocab) in study_set {
         println!();
@@ -60,23 +60,13 @@ pub fn main() -> Result<(), Box<dyn Error>> {
 
         io::stdin().read_line(&mut guess)?;
 
-        let distance = match_service.check_vocab_match(
-            &vocab.learning_lang,
-            &vocab.alternatives.clone().unwrap(),
-            &guess,
-        );
+        let prompt = match_service.check_response(
+            vocab.id,
+            vocab_study.id,
+            guess,
+        )?;
 
-        let updated = match_service.update_vocab_study_stats(vocab_study.id, awesome_person_id, distance)?;
-
-        if distance > 0 {
-            println!("'{}' != '{}'", &vocab.learning_lang, &guess.trim());
-        }
-
-        println!(
-            "Correctness {} -> {}",
-            &vocab_study.percentage_correct.unwrap(),
-            &updated.percentage_correct.unwrap()
-        );
+        println!("{}", &prompt);
     }
 
     Ok(())

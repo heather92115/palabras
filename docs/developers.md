@@ -24,5 +24,5 @@ source test.env  # to run tests
 
 To update the diesel schema to match the database
 ```zsh
-diesel print-schema > src/schema.rs
+diesel print-schema > src/studies
 ```
