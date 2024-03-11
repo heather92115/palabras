@@ -2,7 +2,7 @@
 #[cfg(test)]
 use crate::dal::awesome_person::AwesomePersonRepository;
 use crate::dal::vocab_study::VocabStudyRepository;
-use crate::models::{AwesomePerson, NewVocab, Vocab, VocabStudy};
+use crate::models::{AwesomePerson, NewAwesomePerson, NewVocab, Vocab, VocabStudy};
 use crate::models::{NewVocabStudy};
 use diesel::result::Error as DieselError;
 use crate::dal::vocab::VocabRepository;
@@ -87,8 +87,8 @@ fn create_test_data() -> (VocabStudy, Vec<VocabStudy>, Vocab, Vec<Vocab>, Vec<(V
 pub struct MockAwesomePersonRepository;
 
 impl AwesomePersonRepository for MockAwesomePersonRepository {
-    fn get_awesome_person_by_id(&self, stats_id: i32) -> Result<AwesomePerson, DieselError> {
-        Ok(AwesomePerson {
+    fn get_awesome_person_by_id(&self, stats_id: i32) -> Result<Option<AwesomePerson>, DieselError> {
+        Ok(Some(AwesomePerson {
             id: stats_id,
             num_known: Some(100),
             num_correct: Some(80),
@@ -98,11 +98,26 @@ impl AwesomePersonRepository for MockAwesomePersonRepository {
             name: None,
             code: None,
             smallest_vocab: 0,
-        })
+        }))
     }
 
     fn update_awesome_person(&self, _stats: AwesomePerson) -> Result<usize, String> {
         Ok(1)
+    }
+
+    fn create_awesome_person(
+        &self,
+        new_awesome_person: &NewAwesomePerson,
+    ) -> Result<AwesomePerson, String> {
+        Ok(AwesomePerson {
+            id: 2,
+            num_known: new_awesome_person.num_known,
+            num_correct: new_awesome_person.num_correct,
+            num_incorrect: new_awesome_person.num_incorrect,
+            total_percentage: new_awesome_person.total_percentage,
+            name: new_awesome_person.name.clone(),
+            ..Default::default()
+        })
     }
 }
 
