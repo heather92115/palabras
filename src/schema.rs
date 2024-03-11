@@ -34,13 +34,14 @@ pub mod palabras {
             id -> Int4,
             vocab_id -> Int4,
             awesome_person_id -> Int4,
-            guesses -> Nullable<Int4>,
+            attempts -> Nullable<Int4>,
             percentage_correct -> Nullable<Float8>,
             last_change -> Nullable<Float8>,
             created -> Timestamptz,
             last_tested -> Nullable<Timestamptz>,
             well_known -> Bool,
             user_notes -> Nullable<Varchar>,
+            correct_attempts -> Nullable<Int4>,
         }
     }
 

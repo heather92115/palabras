@@ -7,7 +7,7 @@ use axum::{
     Router,
 };
 use tokio::net::TcpListener;
-use crate::gql::studies::{QueryRoot, StudyMutation};
+use crate::gql::studies::{QueryRoot, MutationRoot};
 
 async fn graphiql() -> impl IntoResponse {
     response::Html(GraphiQLSource::build().endpoint("/").finish())
@@ -15,7 +15,7 @@ async fn graphiql() -> impl IntoResponse {
 
 pub async fn start_axum(listener: TcpListener) {
 
-    let schema = Schema::build(QueryRoot, StudyMutation, EmptySubscription)
+    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
         .finish();
 
     let app = Router::new().route("/", get(graphiql).post_service(GraphQL::new(schema)));

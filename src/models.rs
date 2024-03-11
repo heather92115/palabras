@@ -71,13 +71,14 @@ pub struct VocabStudy {
     pub id: i32,               // Primary key used to look up pair in the data layer.
     pub vocab_id: i32,         // Foreign key relates to the vocab table in the data layer.
     pub awesome_person_id: i32, // Foreign key relates to the awesome_person table in the data layer.
-    pub guesses: Option<i32>,   // The number of times this pair was attempted.
+    pub attempts: Option<i32>,   // The number of times the related vocab word was attempted.
     pub percentage_correct: Option<f64>, // The percentage of correct guesses calculated using the distance from the correct match.
     pub last_change: Option<f64>, // The most recent percentage correct change
     pub created: DateTime<Utc>, // Assuming `created` is set automatically to NOW(), you might not need this field during insertion.
     pub last_tested: Option<DateTime<Utc>>, // The last time this pair was guessed or tested.
     pub well_known: bool,      // If the pair is known, it is skipped to focus on new pairs
     pub user_notes: Option<String>, // Hint supplied by user to be displayed to help user translate words.
+    pub correct_attempts: Option<i32>,   // The number of times the related vocab word was correctly attempted.
 }
 
 impl Default for VocabStudy {
@@ -92,7 +93,8 @@ impl Default for VocabStudy {
             last_tested: Default::default(),
             well_known: Default::default(),
             user_notes: None,
-            guesses: None,
+            attempts: None,
+            correct_attempts: None,
         }
     }
 }
@@ -103,13 +105,14 @@ impl Default for VocabStudy {
 pub struct NewVocabStudy {
     pub vocab_id: i32,         // Foreign key relates to the vocab table in the data layer.
     pub awesome_person_id: i32, // Foreign key relates to the awesome_person table in the data layer.
-    pub guesses: Option<i32>,   // The number of times this pair was attempted.
+    pub attempts: Option<i32>,   // The number of times this pair was attempted.
     pub percentage_correct: Option<f64>, // The percentage of correct guesses calculated using the distance from the correct match.
     pub last_change: Option<f64>, // The most recent percentage correct change
     pub created: DateTime<Utc>, // Assuming `created` is set automatically to NOW(), you might not need this field during insertion.
     pub last_tested: Option<DateTime<Utc>>, // The last time this pair was guessed or tested.
     pub well_known: bool,      // If the pair is known, it is skipped to focus on new pairs
     pub user_notes: Option<String>, // Hint supplied by user to be displayed to help user translate words.
+    pub correct_attempts: Option<i32>,   // The number of times the related vocab word was correctly attempted.
 }
 
 #[derive(Queryable, Identifiable, AsChangeset, Default)]

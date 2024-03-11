@@ -1,46 +1,47 @@
 learning, infinitive, pos
+tuvimos,tener,Verb
 probar 829356,,
 testingplaya,,Noun
 probar 560817,,
 probar 411368,,
 probar 248197,,
-escritorio,,Noun
+mascotas,,Noun
 probar 299778,,
 probar 520273,,
-trabajo,,Noun
-probar 565043,,
+secretarias,,Noun
 cubano,,Adjective
-mascota,,Noun
+probar 565043,,
+madre,,Noun
 probar 882380,,
 probar 391164,,
 probar 550259,,
-mascotas,,Noun
-los esposos,,Noun
+mensaje,,Noun
+escritorio,,Noun
+trabajo,,Noun
 probar 843817,,
-escritorios,,Noun
+años,,Noun
 probar 238262,,
 probar 128116,,
-trabajos,,Noun
 probar 370442,,
 probar 443849,,
-secretarias,,Noun
 negocio,,Noun
-problema,,Noun
+mascota,,Noun
 mensajes,,Noun
+año,,Noun
+escritorios,,Noun
 probar 902220,,
 probar 387358,,
 probar 987124,,
 probar 929248,,
 probar 669510,,
-año,,Noun
-años,,Noun
-madre,,Noun
+los esposos,,Noun
+mañana,,Noun
 probar 555742,,
 probar 998945,,
 probar 259544,,
 probar 923374,,
 probar 36003,,
-mensaje,,Noun
+trabajos,,Noun
 probar 321453,,
 probar 816258,,
 probar 791285,,
@@ -50,43 +51,63 @@ probar 104846,,
 probar 955092,,
 probar 199839,,
 probar 836972,,
-mañana,,Noun
+problema,,Noun
 probar 174197,,
+hicieron,hacer,Verb
 probar 569712,,
 probar 136149,,
 probar 399288,,
-tuvimos,tener,Verb
-hicieron,hacer,Verb
 un,,Determiner
 dijimos,decir,Verb
 probar 975025,,
 probar 556130,,
 probar 898676,,
+día,,Noun
 están,estar,Verb
+creo que,,
 ayer,,Adverb
 verdad,,Noun
-información,,Noun
-trajimos,traer,Verb
-el,,Determiner
-creo que,,
-ese,,Pronoun
+les,,Pronoun
+al,,Preposition
 digo,decir,Verb
-españa,,Proper noun
-por qué,,
+tu,,Pronoun
+información,,Noun
+el,,Determiner
+trajimos,traer,Verb
+estudiar,,
+conmigo,,Preposition
+internet,,Noun
+dormir,,
+cómo,,
+duele,doler,Verb
+importante,,Adjective
 él,,Pronoun
+anoche,,Adverb
+salud,,Noun
+hacer,hacer,Verb
+españa,,Proper noun
+quiere,querer,Verb
+de compras,,
+ustedes,,Pronoun
+qué,,Pronoun
+su,,Determiner
+ese,,Pronoun
+clase,,Noun
+vive,vivir,Verb
+perro,,Noun
+sí,,
+por qué,,
+pintar,,
 a menudo,,
 son,ser,Verb
-internet,,Noun
-qué,,Pronoun
-vive,vivir,Verb
-anoche,,Adverb
+un poco,,
+hay que,,
+dónde,,Adverb
 ocho,,Numeral
 dibujar,dibujar,Verb
-cómo,,
-salud,,Noun
+nada,nadar,Verb
 con,,Preposition
-hay que,,
-conmigo,,Preposition
+que,,Conjunction
 va,ir,Verb
 dolor,,Noun
 frecuentemente,,Adverb
@@ -95,69 +116,58 @@ deberías,deber,Verb
 hoy,,Adverb
 duelen,doler,Verb
 me,,Pronoun
-hacer,hacer,Verb
-su,,Determiner
+tres,,
+computadora,,Noun
 va a,,
 parar,parar,Verb
 soñar,soñar,Verb
 ellos,,Pronoun
-quiere,querer,Verb
 puedo,poder,Verb
 español,,Noun
 ir,ir,Verb
-al,,Preposition
 de,,Preposition
-de compras,,
 quiénes,,Pronoun
-ustedes,,Pronoun
 nunca,,Adverb
 cocinar,cocinar,Verb
 bien,,Adverb
 por favor,,
 en,,Preposition
-les,,Pronoun
 gatos,,Noun
+ayuda,ayuda,Verb
+las,,Pronoun
 aprendimos,aprender,Verb
 número,,Noun
+tiene,tener,Verb
 trajeron,traer,Verb
 cuidar,cuidar,Verb
 descansar,descansar,Verb
 hija,,
 aquí,,Adverb
-duele,doler,Verb
 nadar,nadar,Verb
 caminar,caminar,Verb
 tengo que,,
 esto,,
-tu,,Pronoun
-día,,Noun
-que,,Conjunction
-un poco,,
-dónde,,Adverb
-oficina,,Noun
-importante,,Adjective
-tiene,tener,Verb
-pintar,,
-dormir,,
-nada,nadar,Verb
-perro,,Noun
-las,,Pronoun
-sí,,
-hijo,,Noun
-estudiar,,
-clase,,Noun
-ayuda,ayuda,Verb
-computadora,,Noun
-tres,,
-van a,,
 ahora,,Adverb
 voy a,,
 odiar,odiar,Verb
 abres,abrir,Verb
-usted trabaja,,
-lo siento,,
+descansas,,Noun
+debería,deber,Verb
+a qué hora,,
+se levantan,,
 responder,responder,Verb
+de vez en cuando,,
+amigo,,Noun
+a ti,,
+hice,hacer,Verb
+fumar,fumar,Verb
 me gusta,,
+salí,salir,Verb
+usted trabaja,,
+pregunta,,Noun
+lo siento,,
+novia,,Noun
+divertida,,Adjective
 sándwiches,,Noun
 queremos,querer,Verb
 te gusta,,
@@ -173,22 +183,22 @@ se ponen,,
 se duchan,,
 niña,,Noun
 se lavan,,
-se levantan,,
 mis,,Determiner
 señor,,Noun
-debería,deber,Verb
+fiesta,,Noun
 montar,montar,Verb
-fumar,fumar,Verb
+quién,,Pronoun
 usted,,Pronoun
-de vez en cuando,,
+más,,Adjective
 estás,estar,Verb
 correr,correr,Verb
 buen,,Adjective
 tan,,Adverb
 tienes que,,
-a ti,,
+padre,,
 tenemos que,,
 descansó,descansar,Verb
+médica,,Noun
 hay,hay,Verb
 me cepillé,,
 tiene que,,
@@ -196,81 +206,74 @@ jabones,,Noun
 tienen,tener,Verb
 cuatro,,Numeral
 mover,mover,Verb
-a qué hora,,
-izquierda,,Noun
 puede,poder,Verb
-nos sentimos,,
+izquierda,,Noun
+maleta,,Noun
 desayunar,desayunar,Verb
-salí,salir,Verb
+hijo,,Noun
 viajaron,viajar,Verb
 bebieron,beber,Verb
-hice,hacer,Verb
+dos,,Numeral
 adónde,,Adverb
 visitó,visitar,Verb
 disfrutaron,disfrutar,Verb
 conoció,conocer,Verb
 abriste,abrir,Verb
-médica,,Noun
-quién,,Pronoun
+para,,Noun
 fue,ser,Verb
 béisbol,,Noun
 cerca de,,
 fútbol,,Noun
 sábado,,Noun
-divertida,,Adjective
-fiesta,,Noun
-dos,,Numeral
-nos cepillamos,,
-descansas,,Noun
-pregunta,,Noun
-amigo,,Noun
-maleta,,Noun
-más,,Adjective
-padre,,
-para,,Noun
 mucho,,Adjective
-novia,ver,Verb
+mayo,,Noun
+nosotros,,Pronoun
 desafortunadamente,,Adverb
 viernes,,Noun
+parece,,
+venir,venir,Verb
+cuando,,Conjunction
+trabajé,trabajar,Verb
+baile,,Noun
+nieva,nevar,Verb
+porque,,Conjunction
+cumpleaños,,Noun
+marzo,,Noun
 estuvimos,estar,Verb
 universidades,,Noun
-porque,,Conjunction
+escuela,,Noun
 cerrado,,
 sobre,,Adverb
 de niño,,
 me encanta,,
-cuando,,Conjunction
 de niña,,
 siempre,,Adverb
 cuándo,,Adverb
 tarde,,Adverb
-nos duchamos,,
 lavarse,,Pronoun
 nos llamamos,,
 se cepillan,,
-marzo,,Noun
+tomar,,
 qué tiempo hace,,
-nieva,nevar,Verb
+julio,,Noun
 a veces,,
 septiembre,,Noun
 abril,,Noun
-julio,,Noun
+sus,,Determiner
 octubre,,Noun
 está,estar,Verb
-mayo,,Noun
 febrero,,Noun
 mal tiempo,,
 noviembre,,Noun
 vacaciones,,Noun
-nosotros,,Pronoun
 practicar,practicar,Verb
 nos encontramos,,
 lluvia,,Noun
 encantar,encantar,Verb
 nevar,nevar,Verb
-parece,,
-venir,venir,Verb
-baile,,Noun
+abuelo,,
+probar 907349,,
+oye,oír,Verb
 ven,venir,Verb
 pena,,Noun
 converso,conversar,Verb
@@ -279,6 +282,7 @@ universidad,,Noun
 verde,,Adjective
 la amarilla,,
 muy,,Adverb
+domingo,,Noun
 tele,,Noun
 ahí,,Adverb
 elegimos,elegir,Verb
@@ -291,34 +295,37 @@ comieron,comer,Verb
 necesitas,necesitar,Verb
 allí,,Adverb
 nevando,nevar,Verb
-semana,,Noun
-sus,,Determiner
 montaste,montar,Verb
 veinte,,Numeral
-cumpleaños,,Noun
+carro,,Noun
 diez,,Numeral
 por,,Preposition
-trabajé,trabajar,Verb
-oye,oír,Verb
 libro,,
-abuelo,,
-domingo,,Noun
-tomar,,
-escuela,,Noun
-carro,,Noun
-persona,,Noun
+semana,,Noun
+vas a,,
+dar,dar,Verb
 pintó,pintar,Verb
 lavar,lavar,Verb
+leí,leer,Verb
+sitios,,Noun
+descansaron,descansar,Verb
+hago,hacer,Verb
+cambiar,cambiar,Verb
+estudiando,estudiar,Verb
+antes,,Preposition
+bolígrafo,,
+estómagos,,Noun
+descansaste,descansar,Verb
 seis,,Numeral
+puedes,poder,Verb
 cinco,,Numeral
 cuesta,costar,Verb
 llevar,llevar,Verb
 treinta,,Numeral
-testingamarillas,,Adjective
-puedes,poder,Verb
+quiero,,
+fábrica,,Noun
 lejos,,Adverb
 allá,,Adverb
-dar,dar,Verb
 francés,,Noun
 preferir,preferir,Verb
 tus,,Determiner
@@ -328,29 +335,29 @@ nos acostamos,,
 nos sentamos,,
 entiendes,entender,Verb
 necesita,necesitar,Verb
+carne,,Noun
 enviar,enviar,Verb
 canales,,Noun
-leí,leer,Verb
+anuncios,,Noun
 cerrar,cerrar,Verb
 le,,Pronoun
 dijeron,decir,Verb
 máquinas,,Noun
 ingenieras,,Noun
-sitios,,Noun
 sitio,,Noun
 tuvieron,tener,Verb
 tú lees,,
-vas a,,
+escribir,,
 tenemos,tener,Verb
 archivo,,Noun
-anuncios,,Noun
 anuncio,,Noun
 siéntate,,Pronoun
 grandes,,Adjective
 lávese,,Pronoun
+me siento,,
 mirar,mirar,Verb
-estudiando,estudiar,Verb
-cambiar,cambiar,Verb
+probarte,,Pronoun
+casa,,Noun
 sé,saber,Verb
 viniste,venir,Verb
 oír,oír,Verb
@@ -359,44 +366,38 @@ estoy,estar,Verb
 del,,Preposition
 cuidan,cuidar,Verb
 vas,ir,Verb
-enfermeras,,Adjective
-hago,hacer,Verb
 cuida,cuidar,Verb
 cuidas,cuidar,Verb
 cigarrillos,,Noun
-descansaste,descansar,Verb
 pálida,,Adjective
-descansaron,descansar,Verb
 beber,beber,Verb
 dr.,,Noun
 se cepillaron,,
 te cepillaste,,
 dra.,,Noun
 se cepilló,,
-estómagos,,Noun
+mesa,,Noun
 quedarnos,,Pronoun
 mal,,Noun
-probarte,,Pronoun
 cenar,cenar,Verb
 salir,salir,Verb
 recordar,recordar,Verb
 ponerte,,Pronoun
 dirección,,Noun
-salir a,,
-antes,,Preposition
+pequeño,,Adjective
 levantarme,,Pronoun
 película,,Noun
-quiero,,
-casa,,Noun
-escribir,,
-pequeño,,Adjective
-me siento,,
-fábrica,,Noun
-mesa,,Noun
-carne,,Noun
-bolígrafo,,
+sesenta,,Numeral
 encontrar,encontrar,Verb
+camisa,,Noun
 corrió,correr,Verb
+apaga,apagar,Verb
+vinieron,venir,Verb
+media,,Noun
+taxi,,Noun
+baloncesto,,Noun
+encontramos,encontrar,Verb
+qué tal si,,
 algo de,,
 llover,llover,Verb
 disfrutando,disfrutar,Verb
@@ -421,17 +422,17 @@ tome,tomar,Verb
 direcciones,,Noun
 vamos,ir,Verb
 arriba,,Adverb
-taxi,,Noun
+señora,,Noun
+vino,,Noun
 dormimos,dormir,Verb
 lloviendo,llover,Verb
 comenzar,comenzar,Verb
 tan bonita,,
-apaga,apagar,Verb
+boleto,,
 encendió,encender,Verb
 poner,poner,Verb
-baloncesto,,Noun
+estudiante,,Noun
 comprar,,
-sesenta,,Numeral
 practiqué,practicar,Verb
 mil,,Numeral
 tiempo,,Noun
@@ -443,10 +444,10 @@ a lo mejor,,
 podemos,poder,Verb
 jazz,,Noun
 compró,comprar,Verb
-media,,Noun
+biblioteca,,Noun
 sueño,,Noun
-qué tal si,,
-encontramos,encontrar,Verb
+probar 997590,,
+todo,,Pronoun
 respondió,responder,Verb
 dibujaste,dibujar,Verb
 espere,esperar,Verb
@@ -455,20 +456,12 @@ estar,estar,Verb
 acá,,Adverb
 entonces,,Adverb
 compraste,comprar,Verb
-vinieron,venir,Verb
+tampoco,,Adverb
 alguien,,Pronoun
 seiscientos,,Numeral
 nos llamas,,
 nos compra,,
 derecho,,Noun
-vino,,Noun
-tampoco,,Adverb
-boleto,,
-estudiante,,Noun
-biblioteca,,Noun
-señora,,Noun
-todo,,Pronoun
-camisa,,Noun
 me ama,,
 me conoce,,
 me enseña,,
@@ -476,86 +469,83 @@ le gusta,,
 me escucha,,
 aprender,aprender,Verb
 disculpe, señor,,
+cuarto,,Noun
+unos,,Determiner
 gire,girar,Verb
+usar,usar,Verb
+limpiar,limpiar,Verb
+comimos,comer,Verb
+baño,,Noun
+corrimos,correr,Verb
+portátiles,,Adjective
+encima,,Adverb
+apagas,apagar,Verb
+mediodía,,Noun
+simpática,,Adjective
+apagaron,apagar,Verb
+gato,,
 siga,seguir,Verb
 atrás,,Adverb
 cerca,,Adverb
 sentarse,,Pronoun
-gato,,
-limpiar,limpiar,Verb
-apagas,apagar,Verb
-usar,usar,Verb
+sombrero,,Noun
+vivo,,
+ropa,,Noun
 celulares,,Noun
 hablar,hablar,Verb
 acompañar,acompañar,Verb
 conversar,conversar,Verb
 abrimos,abrir,Verb
-corrimos,correr,Verb
+café,,
 pasamos,pasar,Verb
-comimos,comer,Verb
+después,,Preposition
 fuimos,ser,Verb
 encendiste,encender,Verb
 cada,,Determiner
 se pone,,
 solo,,Adverb
 usualmente,,Adverb
+grande,,
 hace,,
 conocieron,conocer,Verb
 compraron,comprar,Verb
 cuatrocientos,,Numeral
 lunes,,Noun
 nos vemos,,
-familia,,Noun
 pedir,pedir,Verb
 alcohol,,Noun
 chef,,Noun
-apagaron,apagar,Verb
 alfombras,,Noun
-café,,
-portátiles,,Adjective
 encantó,encantar,Verb
 traje,traje,Verb
-mediodía,,Noun
+hotel,,Noun
 recibir,recibir,Verb
 le encanta,,
-unos,,Determiner
-encima,,Adverb
 tarjeta de crédito,,
 vinimos,venir,Verb
 fuiste,ser,Verb
 junio,,Noun
-europa,,Proper noun
 perder,perder,Verb
-vivo,,
-grande,,
-después,,Preposition
-nueve,,Adjective
-cuarto,,Noun
-simpática,,Adjective
+europa,,Proper noun
 reloj,,Noun
-ropa,,Noun
-baño,,Noun
-hotel,,Noun
-sombrero,,Noun
 probar 915621,,
-gustaría,gustar,Verb
 olvidar,olvidar,Verb
-hizo,hacer,Verb
-cogimos,coger,Verb
+gustaría,gustar,Verb
+jueves,,Noun
+cuarenta,,Numeral
 gran,,Adjective
 contigo,,Pronoun
 inglés,,Noun
 querer,querer,Verb
 el azul,,
 nos despertamos,,
-abrí,abrir,Verb
+pagar,,
 para ella,,
 elijo,elegir,Verb
 visitar,visitar,Verb
 empiezo,empezar,Verb
 hay alguna,,
 el rojo,,
-nos ponemos,,
 cepillo de dientes,,
 cepillarse,,Pronoun
 tienes,tener,Verb
@@ -568,23 +558,24 @@ almuerzo,almorzar,Verb
 comprender,comprender,Verb
 tercer,,Determiner
 interesante,,Adjective
+hizo,hacer,Verb
+cogimos,coger,Verb
+abrí,abrir,Verb
 inglaterra,,Proper noun
 saliste,salir,Verb
 caminaste,caminar,Verb
-cuarenta,,Numeral
+probar 103476,,
 mantequilla,,Noun
 cuestan,costar,Verb
-jueves,,Noun
 donde,,
-qué te parece,,
 jóvenes,,Adjective
 medianoche,,Noun
 pueblo,,Noun
-pagar,,
+arroz,,Noun
+favorita,,Adjective
 vamos a,,
 llovió,llover,Verb
 poder,poder,Verb
-entender,entender,Verb
 viajar,viajar,Verb
 entienden,entender,Verb
 pueden,poder,Verb
@@ -592,7 +583,7 @@ volver,volver,Verb
 almorzar,almorzar,Verb
 prueba,probar,Verb
 empezar,empezar,Verb
-arroz,,Noun
+cartera,,Noun
 cantar,cantar,Verb
 qué le parece,,
 hambre,,Noun
@@ -600,7 +591,6 @@ cómo le va,,
 hola,,Interjection
 cómo te va,,
 salimos,salir,Verb
-las nuestras,,
 como,,Preposition
 usando,usar,Verb
 gente,,Noun
@@ -627,7 +617,6 @@ todo el tiempo,,
 somos,ser,Verb
 tan bonito,,
 inteligente,,Adjective
-la más,,
 año nuevo,,
 durante,,Preposition
 navidad,,Noun
@@ -640,17 +629,19 @@ eran,ser,Verb
 veinticuatro,,Numeral
 señorita,,Noun
 concierto,,Noun
-pasaporte,pasar,Verb
-favorita,,Adjective
-cartera,,Noun
+probar 263069,,
+me interesa,,
+pronto,,Adverb
+cuánta,,Determiner
+sol,,Noun
+uno,,Noun
 té,,Noun
 pagaste,pagar,Verb
 coger,coger,Verb
 disfrutar,disfrutar,Verb
 hay algún,,
 también,,Adverb
-les interesa,,
-me interesa,,
+alto,,Adjective
 tenis,,Noun
 montamos,montar,Verb
 disfrutamos,disfrutar,Verb
@@ -665,7 +656,6 @@ lavaron,lavar,Verb
 estuvo,estar,Verb
 el peor,,
 quisiera,querer,Verb
-restaurante,,Noun
 parrilla,,Noun
 lo quiero,,
 uso,usar,Verb
@@ -677,7 +667,6 @@ estuviste,estar,Verb
 buscando,buscar,Verb
 girar,girar,Verb
 invitaciones,,Noun
-sol,,Noun
 enero,,Noun
 comenzamos,comenzar,Verb
 nos visita,,
@@ -687,6 +676,7 @@ veintidós,,Numeral
 cuántos años,,
 puesto,,Adjective
 calor,,Noun
+maestra,,
 sed,,Noun
 probaste,probar,Verb
 hace mucho tiempo,,
@@ -695,7 +685,6 @@ quince,,Numeral
 trabajar,trabajar,Verb
 tú fuiste,,
 feliz,,Adjective
-preocuparse,,Pronoun
 visitamos,visitar,Verb
 cierra,cerrar,Verb
 vuelva,volver,Verb
@@ -705,18 +694,14 @@ veintiocho,,Numeral
 llegar,llegar,Verb
 veintinueve,,Numeral
 menos,,Noun
-pronto,,Adverb
 doce,,Numeral
 te sientes,,
 nos encanta,,
 normalmente,,Adverb
 leer,leer,Verb
-cuánta,,Determiner
-bellísimo,,Adjective
-uno,,Noun
-maestra,,
-alto,,Adjective
+es grande,,
 que escribir,,
+esposa,,
 escuchando,escuchar,Verb
 comiendo,comer,Verb
 dibujando,dibujar,Verb
@@ -743,7 +728,6 @@ se siente,,
 almorzamos,almorzar,Verb
 empieza,empezar,Verb
 ciclismo,,Noun
-esposa,,
 fin de semana,,
 entiende,entender,Verb
 perdemos,perder,Verb
@@ -765,7 +749,6 @@ que viene,,
 decir,decir,Verb
 comí,comer,Verb
 conocí,conocer,Verb
-viajé,viajar,Verb
 te visitan,,
 nos escuchan,,
 gustó,gustar,Verb
@@ -779,20 +762,22 @@ seguir,seguir,Verb
 fuera,,Adverb
 enfrente,,Adverb
 hermano,,Noun
-es grande,,
 trabaja,trabajar,Verb
 usted pone,,
 quedar,quedar,Verb
-nos acordamos,,
 se levantó,,
 caminé,caminar,Verb
 acostarse,,Pronoun
 detrás,,Preposition
 esposo,,Noun
-divertidísima,,Adjective
+me puede traer,,
 ayudo a,,
 esperar,esperar,Verb
 lavarnos,,Pronoun
+ponerme,,Pronoun
+todo el mundo,,
+bailar,bailar,Verb
+ensaladas,,Noun
 cierran,cerrar,Verb
 pruebo,probar,Verb
 volvemos,volver,Verb
@@ -815,18 +800,19 @@ usted vuelve,,
 usted prueba,,
 hablas con,,
 quedarme,,Pronoun
-ponerme,,Pronoun
+banana,,Noun
 te necesito,,
 nos ayudan,,
 gracias,,Interjection
 te llamamos,,
-bailar,bailar,Verb
-ensaladas,,Noun
+camarero,,Noun
+poco,,Determiner
+caro,,Adjective
 quedarse,,Pronoun
 luego,,Adverb
 gustar,gustar,Verb
 veintitrés,,Numeral
-todo el mundo,,
+primero,,Adjective
 por supuesto,,
 ochenta,,Numeral
 buscar,buscar,Verb
@@ -839,7 +825,8 @@ manejar,manejar,Verb
 levantarte,,Pronoun
 enseña a,,
 prueban,probar,Verb
-me puede traer,,
+malísimo,,Adjective
+rojos,,Adjective
 almuerza,almorzar,Verb
 decimos,decir,Verb
 preguntar,preguntar,Verb
@@ -847,28 +834,25 @@ me llaman,,
 te conozco,,
 jamás,,Adverb
 hiciste,hacer,Verb
-malísimo,,Adjective
-sin,,Preposition
 queso,,Noun
-rojos,,Adjective
-primero,,Adjective
-banana,,Noun
-caro,,Adjective
-poco,,Determiner
-camarero,,Noun
+sin,,Preposition
+bebiendo,beber,Verb
+excursiones,,Noun
+carísimo,,Adjective
 pedimos,pedir,Verb
+tú pones,,
 usted va,,
-algo más,,
+hielo,,Noun
 buen provecho,,
+algo más,,
 cafés,,Noun
 les gusta,,
 las necesita,,
-tú pones,,
+cómics,,Noun
 tú vas,,
 el café,,
 aprendiendo,aprender,Verb
 naranja,,Adjective
-bebiendo,beber,Verb
 conociste,conocer,Verb
 conocer,conocer,Verb
 coges,coger,Verb
@@ -877,29 +861,23 @@ servir,servir,Verb
 abrir,abrir,Verb
 la tuya,,
 espectáculos,,Noun
-excursiones,,Noun
 buenísimos,,Adjective
-hermosísimo,,Adjective
 motocicletas,,Noun
 hobbies,,Noun
-excelente,,Adjective
-carísimo,,Adjective
 obra de teatro,,
 lagos,,Noun
-desayunó,desayunar,Verb
-cómics,,Noun
 aburridísimo,,Adjective
 excursión,,Noun
-grandísima,,Adjective
+vegetariano,,Adjective
 aceites,,Noun
 llamar,llamar,Verb
 televisión,,Noun
 estuvieron,estar,Verb
 estudiaba,estudiar,Verb
 ah,,Interjection
-hielo,,Noun
+excelente,,Adjective
+desayunó,desayunar,Verb
 llenas,,Adjective
-vegetariano,,Adjective
 saludable,,Adjective
 estupendo,,Adjective
 champán,,Noun
@@ -911,35 +889,39 @@ nevó,nevar,Verb
 te ayudo,,
 te compra,,
 jugo,,Noun
+aeropuerto,,Noun
+ensalada,,Noun
+sal,,Noun
 usted hace,,
 fines de semana,,
+lengua,,Noun
+setecientos,,Numeral
+cierras,cerrar,Verb
+que hacer,,
 martes,,Noun
+ocupado,,Adjective
+disponibles,,Adjective
+azúcar,,
 practicamos,practicar,Verb
 visité,visitar,Verb
 saber,saber,Verb
 catorce,,Numeral
-hombres,,Noun
 empiezan,empezar,Verb
 puede traer,,
-ensalada,,Noun
-sal,,Noun
+tú haces,,
 dificilísimo,,Adjective
 generalmente,,Adverb
 cansadísimo,,Adjective
 me compra,,
 ganas,,Noun
 miedo,,Noun
-oímos,oír,Verb
-que hacer,,
 me necesita,,
 siete,,Numeral
 trabajar en,,
-tranquila,,Adjective
 cereales,,Noun
 bosque,,
 cereal,,Noun
-azúcar,,
-tú haces,,
+supermercado,,Noun
 cocinó,cocinar,Verb
 once,,Numeral
 lavó,lavar,Verb
@@ -950,16 +932,15 @@ cómo está,,
 disponible,,Adjective
 miércoles,,Noun
 pierden,perder,Verb
-setecientos,,Numeral
-disponibles,,Adjective
+compra,,Noun
+abrigo,,Noun
 chaqueta,,
 acostarte,,Pronoun
-compra,,Noun
 tienen que,,
 abre,abrir,Verb
 diecinueve,,Numeral
 se acuesta,,
-cierras,cerrar,Verb
+sándwich,,
 siéntese,,Pronoun
 gimnasios,,Noun
 ellos leen,,
@@ -967,10 +948,11 @@ te acuestas,,
 se acuestan,,
 acostarme,,Pronoun
 morada,,Adjective
-fantástico,,Adjective
 almuerzan,almorzar,Verb
 te levantaste,,
 lleva puesto,,
+hombres,,Noun
+oímos,oír,Verb
 acabar,acabar,Verb
 narices,,Noun
 despertarnos,,Pronoun
@@ -983,24 +965,22 @@ te acuerdas,,
 acordarte,,Pronoun
 acordarme,,Pronoun
 queda,quedar,Verb
-mexicano,,Noun
-ocupado,,Adjective
-lengua,,Noun
-sándwich,,
-supermercado,,Noun
-abrigo,,Noun
-aeropuerto,,Noun
+probar 999128,,
+acordarnos,,Pronoun
+comencé,comenzar,Verb
 se despierta,,
+vivir en,,
 despertarme,,Pronoun
 sentirnos,,Pronoun
-comencé,comenzar,Verb
+usaron,usar,Verb
+brazo,,Noun
 recordamos,recordar,Verb
 portugués,,Noun
+china,,Adjective
 pensar,pensar,Verb
 esperaste,esperar,Verb
 noventa,,Numeral
 te duchas,,
-te levantas,,
 se levanta,,
 se ducha,,
 pensó,pensar,Verb
@@ -1011,9 +991,6 @@ se acuerda,,
 se acuerdan,,
 barba,,Noun
 pierna,,Noun
-brazo,,Noun
-acordarnos,,Pronoun
-nos levantamos,,
 me levanté,,
 despiertas,despertar,Verb
 cabeza,,Noun
@@ -1025,18 +1002,15 @@ cuerpo,,Noun
 despertarse,,Pronoun
 despertarte,,Pronoun
 boca,,Noun
-usaron,usar,Verb
 pintaste,pintar,Verb
 usé,usar,Verb
 invitamos,invitar,Verb
 pensé,pensar,Verb
 mandó,mandar,Verb
-practicaron,practicar,Verb
 comprendió,comprender,Verb
 hablar español,,
 quiere aprender,,
 leer este,,
-vivir en,,
 aprendemos,aprender,Verb
 comprendieron,comprender,Verb
 ayudaron,ayudar,Verb
@@ -1056,7 +1030,6 @@ invité,invitar,Verb
 pensaste,pensar,Verb
 esperaron,esperar,Verb
 pensaron,pensar,Verb
-invitó,invitar,Verb
 practicó,practicar,Verb
 vivieron,vivir,Verb
 comprendimos,comprender,Verb
@@ -1071,7 +1044,7 @@ comprenden,comprender,Verb
 tú escribes,,
 necesito comprar,,
 teléfono,,Noun
-china,,Adjective
+preocuparme,,Pronoun
 ella come,,
 nosotras vivimos,,
 tú hablas,,
@@ -1114,7 +1087,6 @@ cantó,cantar,Verb
 levantarse,,Pronoun
 haber,haber,Verb
 pensando,pensar,Verb
-comprendes,comprender,Verb
 cogieron,coger,Verb
 cogió,coger,Verb
 cogí,coger,Verb
@@ -1125,7 +1097,6 @@ respondo,responder,Verb
 enseñaste,enseñar,Verb
 enseñaron,enseñar,Verb
 ejemplo,,Noun
-preocuparme,,Pronoun
 preocuparnos,,Pronoun
 quiero beber,,
 ellos hablan,,
@@ -1135,11 +1106,10 @@ usted vive,,
 cierro la,,
 haciendo,hacer,Verb
 quieren beber,,
-ruido,,Noun
 posible,,Adjective
+ruido,,Noun
 siguiente,,Adjective
 cien,,Numeral
-nacionalidad,,Noun
 comió,comer,Verb
 al lado,,
 veinticinco,,Numeral
@@ -1151,58 +1121,58 @@ pensamos,pensar,Verb
 invitar,invitar,Verb
 te encuentras,,
 nos ayudas,,
+árboles,,Noun
 trece,,Numeral
+duro,,Adjective
 nada es,,
+pobres,,Adjective
+usted bebe,,
 no lo sé,,
+diecisiete,,Numeral
 comienzas,comenzar,Verb
 miraron,mirar,Verb
+oraciones,,Noun
 cocinaron,cocinar,Verb
 aprendo,aprender,Verb
-encontrarnos,,Pronoun
-árboles,,Noun
+clima,,Noun
 me encuentro,,
 se encuentra,,
 se encuentran,,
 encontrarse,,Pronoun
 calurosa,,Adjective
-clima,,Noun
 cuáles,,Pronoun
 veintiuno,,Numeral
 tú bebes,,
 tés,,Noun
 corremos,correr,Verb
+ellas escriben,,
 verdes,,Adjective
 para él,,
 perdona,perdonar,Verb
+rubio,,Adjective
 ser,ser,Verb
-oraciones,,Noun
 emocionante,,Adjective
 gracioso,,Adjective
-duro,,Adjective
 vida,,Noun
-pobres,,Adjective
-usted bebe,,
+ninguna,,Pronoun
+última,,Determiner
 despacio,,Adverb
 segundo,,Adjective
 pobre,,Adjective
-última,,Determiner
-triste,,Adjective
-ninguna,,Pronoun
 hablamos,hablar,Verb
 bebió,beber,Verb
 quiero aprender,,
 le interesa,,
 qué tal,,
 tristes,,Adjective
-sucio,,Adjective
-ellas escriben,,
 barco,,Noun
 queridos,,Adjective
 necesitamos,necesitar,Verb
 te encanta,,
 abrió,abrir,Verb
 cerdos,,Noun
-diecisiete,,Numeral
+triste,,Adjective
+cero,,Noun
 vacas,,Noun
 búhos,,Noun
 veintiún,,Noun
@@ -1210,39 +1180,38 @@ escribes,escribir,Verb
 correo electrónico,,
 se llama,,
 cansada,,Adjective
-cero,,Noun
-pasada,,Adjective
+pasada,pasar,Verb
 pizarra,,Noun
-rubio,,Adjective
-carretera,,Noun
-cercana,,Adjective
-correos electrónicos,,
-mandamos,mandar,Verb
 millón,,Noun
-te lavas,,
+piso,,Noun
 millones,,Noun
+correos electrónicos,,
+cercana,,Adjective
+caja,,Noun
+carretera,,Noun
+taza,,Noun
+paquete,,Noun
+cepillo,,Noun
+pies,,Noun
+te pones,,
+mandamos,mandar,Verb
+bolsa,,Noun
+dieciséis,,Numeral
 portuguesa,,Adjective
 llave,ver,Verb
-te cepillas,,
 mesera,,Noun
-vuelve,volver,Verb
 paredes,,Noun
 césped,,Noun
 pared,,Noun
 seguro,,Adjective
-piso,,Noun
-caja,,Noun
-demasiado,,Adjective
-dieciséis,,Numeral
 sabe usted,,
 tiendas,,Noun
 piensa,pensar,Verb
 hasta luego,,
 probamos,probar,Verb
-pies,,Noun
+te lavas,,
 papel,,Noun
 entrada,,Noun
-taza,,Noun
 bajo,,Adjective
 te quedas,,
 plan,,Noun
@@ -1251,14 +1220,12 @@ cambiamos,cambiar,Verb
 cambiando,cambiar,Verb
 se queda,,
 me quedo,,
-nos quedamos,,
 fecha,,Noun
 me llamo,,
+malo,,Adjective
 imagen,,Noun
 ligeras,,Adjective
 imágenes,,Noun
-paquete,,Noun
-malo,,Adjective
 bici,,Noun
 te llamas,,
 buenas tardes,,
@@ -1266,108 +1233,113 @@ disfruta,disfrutar,Verb
 hasta mañana,,
 mucho gusto,,
 me cepillo,,
-manos,,Noun
+suyas,,Adjective
+te cepillas,,
+vuelve,volver,Verb
 cerramos,cerrar,Verb
 se lava,,
-cepillo,,Noun
 dientes,,Noun
 se cepilla,,
-usted escribe,,
-suyas,,Adjective
-nuestra,,Pronoun
 me lavo,,
+nuestra,,Pronoun
+manos,,Noun
+usted escribe,,
 tú vuelves,,
-te pones,,
 lleva,llevar,Verb
 página,,Noun
-bolsa,,Noun
-inglesa,,Noun
-refrigeradores,,Noun
-centavos,,Noun
 chorizo,,Noun
 picante,,Noun
-plátanos,,Noun
-colores,,Noun
+partido,,Noun
+latina,,Adjective
+dulce,,Adjective
+naranjas,,Adjective
 dulces,,Adjective
 sabes nadar,,
+refrigeradores,,Noun
+popular,,Adjective
+manejo,manejar,Verb
+centavos,,Noun
+asignatura,,Noun
+conversación,,Noun
+museo,,Noun
+dibujan,dibujar,Verb
+foto,,Noun
+plátanos,,Noun
+colores,,Noun
+buscamos,buscar,Verb
+tren,,Noun
+ojos,,Noun
+elegante,,Adjective
+peores,,Adjective
+juego,,Noun
 color,,Noun
 bota,,Noun
-partido,,Noun
-naranjas,,Adjective
 ambos,,Determiner
-juego,,Noun
-latina,,Adjective
-ojos,,Noun
 flor,,Noun
 flores,,Noun
 calientes,,Adjective
 italianos,,Adjective
-dulce,,Adjective
-chileno,,Adjective
+mundo,,Noun
 aviones,,Noun
+llegas,llegar,Verb
 cámaras,,Noun
 cámara,,Noun
 minuto,,Noun
-llegas,llegar,Verb
 avión,,Noun
 próxima,,Adjective
 cómo se dice,,
-popular,,Adjective
+mejores,,Adjective
 delgada,,Adjective
-mundo,,Noun
-peores,,Adjective
 mejor,,Adjective
 peor,,Adjective
 famosa,,Adjective
-mejores,,Adjective
 gorra,,Noun
-manejo,manejar,Verb
-palabra,,Noun
-mismo,,Adjective
+respuesta,,Noun
 canciones,,Noun
 canción,,Noun
 maneja,manejar,Verb
 edad,,Noun
-respuesta,,Noun
-asignatura,,Noun
+palabra,,Noun
 grupo,,Noun
 preferida,preferir,Verb
 pintura,,Noun
-museo,,Noun
-dibujan,dibujar,Verb
 europeas,,Adjective
-conversación,,Noun
-foto,,Noun
 conversaciones,,Noun
 tomate,,
 medicina,,
-buscamos,buscar,Verb
+hospital,,Noun
 otoños,,Noun
 ayudar,ayudar,Verb
 buenas noches,,
 de nada,,
 marrón,,Noun
-elegante,,Adjective
-hospital,,Noun
-tren,,Noun
-camiseta,,Noun
+curso,,Noun
+marrones,,Noun
+fáciles,,Adjective
+invierno,,Noun
 primavera,,Noun
+viento,,Noun
 nublado,,Adjective
 oscuro,,Adjective
-invierno,,Noun
-viento,,Noun
+sales,,Noun
 difícil,,Adjective
-fáciles,,Adjective
+responsable,,Adjective
+es divertido,,
+amarillas,,Adjective
+negra,,Adjective
 difíciles,,Adjective
-cosa,,Noun
+preocupados,,Adjective
 tarea,,Noun
-curso,,Noun
+vaso,,Noun
+deporte,,Noun
+camino,caminar,Verb
+cosa,,Noun
+tallas,,Noun
+pizza,,Noun
 muñeca,,Noun
 gris,,Adjective
-marrones,,Noun
 grises,,Adjective
 larga,,Adjective
-pizza,,Noun
 países,,Noun
 enseñas,enseñar,Verb
 corren,correr,Verb
@@ -1376,38 +1348,29 @@ vemos,ver,Verb
 veo,ver,Verb
 diferente,,Adjective
 visita,visitar,Verb
-parte,,Noun
 diferentes,,Adjective
+parte,,Noun
 lugar,,Noun
 lugares,,Noun
 país,,Noun
-camino,caminar,Verb
+vieja,,Adjective
 río,,Noun
 disfrutan,disfrutar,Verb
 disfrutas,disfrutar,Verb
-es divertido,,
-busco,buscar,Verb
-amarillas,,Adjective
-buscan,buscar,Verb
-tallas,,Noun
-responsable,,Adjective
-moreno,,Adjective
-vieja,,Adjective
-negra,,Adjective
-perezoso,,Adjective
-estudioso,,Adjective
 responsables,,Adjective
-pesos,,Noun
-dólares,,Noun
+busco,buscar,Verb
+moreno,,Adjective
+perezoso,,Adjective
 sorprendidas,,Adjective
-toco,tocar,Verb
-nervioso,,Adjective
-preocupados,,Adjective
 enojada,,Adjective
 probadores,,Noun
+pesos,,Noun
+dólares,,Noun
+buscan,buscar,Verb
+barata,,Adjective
 probador,,Noun
 precio,,Noun
-barata,,Adjective
+toco,tocar,Verb
 tocan,tocar,Verb
 menores,,Adjective
 marido,,Noun
@@ -1415,69 +1378,112 @@ menor,,Adjective
 tocamos,tocar,Verb
 mayor,,Adjective
 mayores,,Adjective
-deporte,,Noun
-americano,,Adjective
-vaso,,Noun
-sales,,Noun
+nos sentimos,,
+pagas,pagar,Verb
+plato,,Noun
+nos duchamos,,
 cervezas,,Noun
+silla,,Noun
+bebé,,Noun
+probar 823723,,
+puerta,,Noun
+moderno,,Adjective
+calle,,Noun
+van a,,
+falda,,Noun
+piscina,,Noun
+elegantes,,Adjective
+buena,,Adjective
+hospitales,,Noun
+metro,,Noun
+banco,,Noun
+cuchara,,Noun
+oficina,,Noun
+nos cepillamos,,
+enfermeras,,Adjective
+familia,,Noun
+salir a,,
+vestido,,Noun
+favorito,,Adjective
+persona,,Noun
+jardín,,Noun
 pagan,pagar,Verb
 debajo,,Preposition
-pagas,pagar,Verb
-postre,,Noun
 sopas,,Noun
+postre,,Noun
 pago,pagar,Verb
 frita,,Adjective
 botella,,Noun
 blanco,,Adjective
 cuchillo,,Noun
-cuchara,,Noun
-plato,,Noun
-jardín,,Noun
+habitaciones,,Noun
+nevera,,Noun
+camas,,Noun
 azul,,Adjective
 jardines,,Noun
 limpiamos,limpiar,Verb
 planta,,Noun
-silla,,Noun
 estantería,,Noun
 ventana,,Noun
-habitaciones,,Noun
 relojes,,Noun
 azules,,Adjective
-dormitorio,,Noun
-nevera,,Noun
-puerta,,Noun
-moderno,,Adjective
 cocina,,Noun
-camas,,Noun
-parque,,Noun
-hora,,Noun
+dormitorio,,Noun
 cine,,Noun
-noche,,Noun
-trenes,,Noun
-elegantes,,Adjective
-bicicleta,,Noun
-chico,,Noun
-piscina,,Noun
-falda,,Noun
 chocolates,,Noun
-favorito,,Adjective
-verano,,Noun
-buena,,Adjective
-aburridas,,Adjective
+hora,,Noun
+chico,,Noun
+noche,,Noun
+bicicleta,,Noun
 periódico,,Noun
-hospitales,,Noun
+aburridas,,Adjective
+verano,,Noun
 hoteles,,Noun
-metro,,Noun
-banco,,Noun
-calle,,Noun
+trenes,,Noun
 autobús,,Noun
+parque,,Noun
 estación,,Noun
 estaciones,,Noun
 pantalón,,Noun
 pantalones,,Noun
-jugadoras,,Noun
 zapatos,,Noun
-vestido,,Noun
-bebé,,Noun
 mamá,,Noun
 papá,,Noun
+mismo,,Adjective
+inglesa,,Noun
+pasaporte,,
+nos ponemos,,
+qué te parece,,
+entender,entender,Verb
+las nuestras,,
+la más,,
+les interesa,,
+restaurante,,Noun
+preocuparse,,Pronoun
+nueve,,Adjective
+viajé,viajar,Verb
+nos acordamos,,
+hermosísimo,,Adjective
+bellísimo,,Adjective
+divertidísima,,Adjective
+grandísima,,Adjective
+tranquila,,Adjective
+fantástico,,Adjective
+te levantas,,
+nos levantamos,,
+practicaron,practicar,Verb
+invitó,invitar,Verb
+comprendes,comprender,Verb
+nacionalidad,,Noun
+encontrarnos,,Pronoun
+demasiado,,Adjective
+nos quedamos,,
+testingamarillas,,Adjective
+chileno,,Adjective
+estudioso,,Adjective
+sucio,,Adjective
+nervioso,,Adjective
+mexicano,,Noun
+americano,,Adjective
+jugadoras,,Noun
+camiseta,,Noun
