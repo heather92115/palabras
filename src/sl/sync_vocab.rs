@@ -4,13 +4,14 @@ use crate::dal::file_access::{
 };
 use crate::dal::vocab::{DbVocabRepository, VocabRepository};
 use crate::dal::vocab_study::{DbVocabStudyRepository, VocabStudyRepository};
-use crate::models::{NewVocab, NewVocabStudy, Vocab, VocabStudy};
+use crate::models::{AwesomePerson, NewVocab, NewVocabStudy, Vocab, VocabStudy};
 use crate::sl::fuzzy_match_vocab::{WELL_KNOWN_THRESHOLD};
 use diesel::result::Error as DieselError;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Mutex;
+use crate::dal::awesome_person::{AwesomePersonRepository, DbAwesomePersonRepository};
 use crate::sl::duo_import::{LanguageData, load_vocab_from_json, VocabOverview};
 
 /// Determines hints for a given phrase by analyzing its length and the presence of specific pronouns.
@@ -686,6 +687,34 @@ pub fn load_translations(
     translation_map
 }
 
+/// Verifies if an `AwesomePerson` exists by their ID.
+///
+/// This function searches for an `AwesomePerson` in the database using a given ID. If the `AwesomePerson`
+/// is found, it returns `Ok(AwesomePerson)`. If not found, it returns an `Err` with a message indicating
+/// no AwesomePerson was found with the given ID.
+///
+/// # Arguments
+///
+/// * `awesome_person_id` - The ID of the `AwesomePerson` to verify.
+///
+/// # Returns
+///
+/// * `Ok(AwesomePerson)` if the `AwesomePerson` is found.
+/// * `Err(String)` if no `AwesomePerson` is found, with a message including the ID.
+pub fn verify_awesome_person(awesome_person_id: i32) -> Result<AwesomePerson, String> {
+
+    let repo = DbAwesomePersonRepository;
+
+    let awesome_person
+        = repo.get_awesome_person_by_id(awesome_person_id).map_err(|e| e.to_string())?;
+
+    if awesome_person.is_none() {
+        Err(format!("No Awesome person was found with id {}", awesome_person_id))
+    } else {
+        Ok(awesome_person.unwrap())
+    }
+}
+
 /// Imports vocabulary data into the database, with translations provided through external files.
 ///
 /// This high-level function orchestrates the process of loading vocabulary items from a JSON file,
@@ -762,7 +791,9 @@ pub fn import_duo_vocab(
 ) -> Result<(), String> {
     let vocab = load_vocab_from_json(&vocab_config.vocab_json_file_name)?;
     let translation_map = load_translations(translation_configs);
-    process_duo_vocab(vocab_config, &vocab, &translation_map, awesome_id)
+
+    let awesome_person = verify_awesome_person(awesome_id)?;
+    process_duo_vocab(vocab_config, &vocab, &translation_map, awesome_person.id)
 }
 
 /// Exports translation pairs with missing "first language" fields to a CSV file.

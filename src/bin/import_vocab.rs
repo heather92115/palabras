@@ -2,7 +2,7 @@ use dotenv::dotenv;
 use palabras::dal::db_connection::verify_connection_migrate_db;
 use palabras::sl::sync_vocab::import_duo_vocab;
 use std::error::Error;
-use std::process;
+use std::{env, process};
 use palabras::config::{load_translations_config, load_vocab_config};
 
 /// A utility to import Duolingo's vocabulary JSON file and a common translations file into the database.
@@ -27,10 +27,11 @@ use palabras::config::{load_translations_config, load_vocab_config};
 ///
 /// ## Usage
 ///
-/// Once the JSON files have been configured and your vocab from DuoLingo is in the referenced file. Just run the import command.
+/// Once the JSON files have been configured and your vocab from DuoLingo is in the referenced file, run the import command
+/// with the awesome_person_id. It defaults to 1.
 ///
 /// ```sh
-/// cargo run --bin import_vocab
+/// cargo run --bin import_vocab 1
 /// ```
 ///
 fn main() -> Result<(), Box<dyn Error>> {
@@ -38,18 +39,32 @@ fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok(); // Load environment variables from .env file
     verify_connection_migrate_db();
 
-    let awesome_person_id = 1; // todo make this not for just me
+    let args: Vec<String> = env::args().collect();
+    let awesome_person_id = if args.len() < 2 {
+        None
+    } else {
+        Some(args[1].clone().parse::<i32>().unwrap())
+    };
+
+    if awesome_person_id.is_none() {
+        eprintln!("Awesome person id is required");
+        eprintln!("Try: ");
+        eprintln!("cargo run --bin import_vocab 1");
+        process::exit(2);
+    }
+
+    let awesome_person_id = awesome_person_id.unwrap_or_default();
 
     let vocab_config = load_vocab_config().unwrap_or_else(|err| {
         eprintln!("Failed to load import translation configs: {}", err);
-        process::exit(2);
+        process::exit(3);
     });
 
     let translation_configs = load_translations_config().unwrap_or(None);
 
     import_duo_vocab(&vocab_config, translation_configs, awesome_person_id).unwrap_or_else(|err| {
         eprintln!("Problem processing word pairs: {}", err);
-        process::exit(3);
+        process::exit(4);
     });
 
     println!("Done!");

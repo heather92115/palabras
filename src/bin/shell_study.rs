@@ -2,7 +2,7 @@ use dotenv::dotenv;
 use palabras::dal::db_connection::verify_connection_migrate_db;
 use palabras::sl::fuzzy_match_vocab::{LearnVocab, VocabFuzzyMatch};
 use std::error::Error;
-use std::io;
+use std::{env, io};
 use std::io::Write;
 
 
@@ -36,8 +36,10 @@ use std::io::Write;
 /// defined, and then execute the binary. The application will guide you through learning sessions
 /// based on your progress.
 ///
+/// Change the awesome_person_id from it default of 1 with the only argument.
+///
 /// ```sh
-/// cargo run --bin shell_study
+/// cargo run --bin shell_study 1
 /// }
 /// ```
 pub fn main() -> Result<(), Box<dyn Error>> {
@@ -47,7 +49,12 @@ pub fn main() -> Result<(), Box<dyn Error>> {
 
     verify_connection_migrate_db();
 
-    let awesome_person_id = 1; // todo make this not for just me
+    let args: Vec<String> = env::args().collect();
+    let awesome_person_id = if args.len() < 2 {
+        1
+    } else {
+        args[1].clone().parse::<i32>().unwrap()
+    };
 
     let match_service = VocabFuzzyMatch::instance();
     let study_set = match_service.get_vocab_to_learn(awesome_person_id, 10)?;

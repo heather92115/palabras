@@ -189,7 +189,7 @@ pub trait LearnVocab {
         awesome_person_id: i32,
         correct: bool,
         last_fully_known: bool,
-    ) -> Result<AwesomePerson, String>;
+    ) -> Result<Option<AwesomePerson>, String>;
 
     /// Determines the match prompt based on the distance between the correct answer and the user's response.
     ///
@@ -437,16 +437,23 @@ impl LearnVocab for VocabFuzzyMatch {
         awesome_person_id: i32,
         correct: bool,
         last_fully_known: bool,
-    ) -> Result<AwesomePerson, String> {
-        let current = self
+    ) -> Result<Option<AwesomePerson>, String> {
+        let awesome_person = self
             .awesome_person_repo
             .get_awesome_person_by_id(awesome_person_id)
             .map_err(|err| err.to_string())?;
 
+        let awesome_person=
+        if awesome_person.is_some() {
+            awesome_person.unwrap_or_default()
+        } else {
+            return Err(format!("Failed to find awesome person with id {}", awesome_person_id));
+        };
+
         // Increment counters based on whether the answer was correct
         let (num_correct, num_incorrect) = (
-            current.num_correct.unwrap_or(0) + correct as i32,
-            current.num_incorrect.unwrap_or(0) + (!correct) as i32,
+            awesome_person.num_correct.unwrap_or(0) + correct as i32,
+            awesome_person.num_incorrect.unwrap_or(0) + (!correct) as i32,
         );
 
         // Calculate the total percentage
@@ -454,12 +461,12 @@ impl LearnVocab for VocabFuzzyMatch {
 
         // Prepare the updated stats
         let updating = AwesomePerson {
-            num_known: if last_fully_known { Some(current.num_known.unwrap_or(0) + 1) } else { current.num_known },
+            num_known: if last_fully_known { Some(awesome_person.num_known.unwrap_or(0) + 1) } else { awesome_person.num_known },
             num_correct: Some(num_correct),
             num_incorrect: Some(num_incorrect),
             total_percentage: Some(total_percentage),
             updated: Utc::now(),
-            ..current
+            ..awesome_person
         };
 
         // Update the stats and return the updated record
@@ -659,10 +666,9 @@ mod tests {
         let awesome_person_id = 1;
         let correct = true;
         let last_fully_known = false;
-        match fuzzy_service.update_overall_progress(awesome_person_id, correct, last_fully_known) {
-            Ok(updated_progress) => println!("Updated progress stats: {}", updated_progress.id),
-            Err(e) => println!("Error updating progress stats: {}", e),
-        }
+        let awesome_person =
+            fuzzy_service.update_overall_progress(awesome_person_id, correct, last_fully_known).expect("Expected default user");
+        let _ = awesome_person.expect("Expected some value for default user");
     }
 
     #[test]

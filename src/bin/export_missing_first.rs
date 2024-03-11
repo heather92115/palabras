@@ -11,6 +11,8 @@ use std::error::Error;
 /// export operation. The export file path can be specified as a command-line argument;
 /// if not provided, a default file path is used.
 ///
+/// Vocab words with missing first language fields are exported, no matter what user uploaded them.
+///
 /// # Environment
 ///
 /// The function reads the `PALABRA_DATABASE_URL` environment variable to establish a

@@ -97,7 +97,6 @@ impl Default for VocabStudy {
     }
 }
 
-
 #[derive(Insertable, Default)]
 #[diesel(table_name = vocab_study)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -126,6 +125,37 @@ pub struct AwesomePerson {
     pub code: Option<String>,          // Code used to identify a user, while in alpha mode.
     pub smallest_vocab: i32,           // Size of the smallest vocab word to be tested.
 }
+
+#[derive(Insertable)]
+#[diesel(table_name = awesome_person)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct NewAwesomePerson {
+    pub num_known: Option<i32>,        // Number of pairs moved to fully known state.
+    pub num_correct: Option<i32>,      // Total number of correct guesses.
+    pub num_incorrect: Option<i32>,    // Total number of incorrect guesses.
+    pub total_percentage: Option<f64>, // Percentage guess correctly.
+    pub updated: DateTime<Utc>,        // Last time stats where updated, (after each guess).
+    pub name: Option<String>,          // User's name.
+    pub code: Option<String>,          // Code used to identify a user, while in alpha mode.
+    pub smallest_vocab: i32,           // Size of the smallest vocab word to be tested.
+}
+
+impl Default for NewAwesomePerson {
+    fn default() -> Self {
+        Self {
+            num_known: Some(0),
+            num_correct: Some(0),
+            num_incorrect: Some(0),
+            total_percentage: Some(0.0),
+            updated: chrono::Utc::now(),
+            name: Some("".to_string()),
+            code: None,
+            smallest_vocab: 1,
+        }
+    }
+}
+
+
 
 pub struct StudySet {
     pub vocab: Vocab,
