@@ -98,11 +98,27 @@ impl VocabStats {
 
 }
 
+/// GraphQL Queries
 pub struct QueryRoot;
 
 #[Object]
 impl QueryRoot {
-    /// Returns the sum of a and b
+
+    /// Fetches a list of vocab study challenges for a specified awesome person.
+    ///
+    /// This async function retrieves a set of vocab words for the awesome person to study,
+    /// limited by the specified `limit`. Each challenge includes a prompt generated based
+    /// on the vocab word and any user notes associated with the vocab study.
+    ///
+    /// # Arguments
+    ///
+    /// * `awesome_id` - The ID of the awesome person for whom to fetch the study challenges.
+    /// * `limit` - The maximum number of challenges to return.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing a vector of `Challenge` structs on success, or an error message string on failure.
+    /// Each `Challenge` struct includes the vocab ID, vocab study ID, and the generated prompt.
     async fn study(&self, awesome_id: i32, limit: i64) -> Result<Vec<Challenge>> {
         let match_service = VocabFuzzyMatch::instance();
 
@@ -121,6 +137,20 @@ impl QueryRoot {
         Ok(study_list)
     }
 
+    /// Retrieves detailed profile information for an awesome person by their ID.
+    ///
+    /// This async function queries the database for the specified awesome person's data,
+    /// including their learning statistics and basic profile details. If the awesome person
+    /// cannot be found, it returns default values for each field.
+    ///
+    /// # Arguments
+    ///
+    /// * `awesome_id` - The unique identifier of the awesome person whose profile is being requested.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` wrapping an `AwesomeProfile` struct containing the awesome person's data on success,
+    /// or an error message string on failure.
     async fn get_awesome_person(&self, awesome_id: i32) -> Result<AwesomeProfile> {
         let match_service = VocabFuzzyMatch::instance();
         let pub_awesome_person = match_service.get_awesome_person(awesome_id)?;
@@ -137,6 +167,20 @@ impl QueryRoot {
         })
     }
 
+    /// Retrieves statistical information for a specific vocabulary study session by its ID.
+    ///
+    /// This async function looks up the study session for a particular vocabulary word and compiles
+    /// key statistics about the user's attempts, successes, and overall performance with that word.
+    /// It also includes the last tested time for the vocabulary, formatted as a readable string.
+    ///
+    /// # Arguments
+    ///
+    /// * `vocab_study_id` - The unique identifier of the vocabulary study session.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` wrapping a `VocabStats` struct containing detailed statistics about the study session on success,
+    /// or an error string on failure.
     async fn get_vocab_stats(&self, vocab_study_id: i32) -> Result<VocabStats> {
 
         let match_service = VocabFuzzyMatch::instance();
@@ -160,10 +204,28 @@ impl QueryRoot {
     }
 }
 
+/// GraphQL Mutations
 pub struct MutationRoot;
 
 #[Object]
 impl MutationRoot {
+
+    /// Checks the user's response for a given vocabulary study session.
+    ///
+    /// This function compares the user's entered response against the correct answer for the specified vocabulary.
+    /// It leverages the `VocabFuzzyMatch` service to assess the accuracy of the response and provides feedback.
+    ///
+    /// # Arguments
+    ///
+    /// * `vocab_id` - The identifier of the vocabulary item being studied.
+    /// * `vocab_study_id` - The identifier of the vocab study session, linking the user and the vocab item.
+    /// * `entered` - The response entered by the user for the vocabulary item.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result<String>` where:
+    /// - `Ok(String)` contains the feedback or prompt based on the comparison of the entered response and the correct answer.
+    /// - `Err` contains an error message if the operation fails.
     async fn check_response(
         &self,
         vocab_id: i32,
