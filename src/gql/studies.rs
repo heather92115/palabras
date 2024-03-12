@@ -140,7 +140,7 @@ impl AwesomeProfile {
 /// track the recency of the user's study efforts and can be used to prompt further review if too much time has elapsed.
 /// # Example
 ///
-/// ```
+/// ```use palabras::gql::studies::VocabStats;
 /// let vocab_stats = VocabStats {
 ///     learning: String::from("palabra"),
 ///     attempts: 10,
