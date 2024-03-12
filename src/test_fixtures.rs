@@ -46,13 +46,14 @@ fn create_test_data() -> (VocabStudy, Vec<VocabStudy>, Vocab, Vec<Vocab>, Vec<(V
         id: 1,
         vocab_id: 1,
         awesome_person_id: 1,
-        guesses: Some(1),
+        attempts: Some(1),
         percentage_correct: Some(0.99),
         last_change: None,
         created: Default::default(),
         last_tested: None,
         well_known: true,
         user_notes: None,
+        correct_attempts: None
     };
 
     let vocab_study_list = vec![
