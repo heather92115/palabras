@@ -29,16 +29,17 @@ To update the project:
 A database connection is required, see [DB Setup](docs/db.md)
 > cargo run --bin shell_study
 
-# Running the GQL Server
+# Running the GQL Web Application Server
 
 Make certain you set up your TCP Address to be used.
 A database connection is required, see [DB Setup](docs/db.md)
 > export SERVER_ADDR=0.0.0.0:3000
 > cargo run
 
-_Note: This is the early days of the gql server, changes are extremely likely_
-
 The GraphiQL IDE can be found on the root TCP Address
+
+# Exporting the GQL Schema
+> cargo run --bin export_gql_schema
 
 # Releasing
 > cargo build --release

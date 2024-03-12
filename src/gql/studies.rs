@@ -1,11 +1,37 @@
 use crate::sl::fuzzy_match_vocab::{LearnVocab, VocabFuzzyMatch};
 use async_graphql::*;
 
+/// Represents a challenge presented to a user for vocabulary practice.
+///
+/// Each challenge is generated based on the user's learning history and targets specific vocabulary
+/// that the user is currently studying. It includes a prompt that may consist of a word or phrase
+/// in the target language, a sentence for translation, or any other form of query designed to
+/// test the user's knowledge and recall of the vocabulary.
+///
+/// # Fields
+///
+/// - `vocab_id`: The unique identifier of the vocabulary item being challenged. This relates to a specific
+/// word or phrase in the study material.
+/// - `vocab_study_id`: The unique identifier for the user's study history with this vocabulary item,
+/// allowing for tracking of progress and retrieval of user-specific study data.
+/// - `prompt`: The question or challenge presented to the user, designed to elicit the correct response or
+/// translation based on the vocabulary being studied.
+///
+/// # Example
+///
+/// ```
+/// use palabras::gql::studies::Challenge;
+/// let challenge = Challenge {
+///     vocab_id: 42,
+///     vocab_study_id: 101,
+///     prompt: String::from("Translate: 'you travel'    pos: Verb"),
+/// };
+/// ```
 #[derive(Clone)]
-struct Challenge {
-    vocab_id: i32,
-    vocab_study_id: i32,
-    prompt: String,
+pub struct Challenge {
+    pub vocab_id: i32,
+    pub vocab_study_id: i32,
+    pub prompt: String,
 }
 
 #[Object]
@@ -23,16 +49,49 @@ impl Challenge {
     }
 }
 
+/// Represents the profile of an awesome person with their vocabulary learning statistics.
+///
+/// This struct is used to encapsulate the learning progress of an individual, tracking both
+/// their successes and areas for improvement in vocabulary study. It includes a variety of
+/// metrics such as the total number of known words, correct and incorrect guesses, as well
+/// as an overall success percentage. Additionally, it provides personal information such as the
+/// user's name and a threshold for the smallest vocabulary word considered for testing.
+///
+/// # Fields
+///
+/// - `id`: The unique identifier of the awesome person. This serves as the primary key for lookup in the data layer.
+/// - `num_known`: The number of vocabulary pairs that the user has fully mastered or known.
+/// - `num_correct`: The total number of correct responses or guesses made by the user across all vocabulary tests.
+/// - `num_incorrect`: The total number of incorrect responses or guesses made by the user across all vocabulary tests.
+/// - `total_percentage`: The overall success rate calculated as the percentage of correct guesses out of the total number of guesses.
+/// - `name`: The name of the user. This field is optional and can be anything the user wants.
+/// - `smallest_vocab`: The minimum length of vocabulary words that are considered for testing. This helps tailor the difficulty of the tests to the user's level.
+///
+/// # Example
+///
+/// ```
+/// use palabras::gql::studies::AwesomeProfile;
+/// let awesome_profile = AwesomeProfile {
+///     id: 1,
+///     num_known: 150,
+///     num_correct: 200,
+///     num_incorrect: 50,
+///     total_percentage: 80.0,
+///     name: String::from("Michelle"),
+///     smallest_vocab: 4,
+/// };
+/// ```
 #[derive(Clone)]
-struct AwesomeProfile {
-    id: i32,               // Primary key used to look up stats in the data layer.
-    num_known: i32,        // Number of pairs moved to fully known state.
-    num_correct: i32,      // Total number of correct guesses.
-    num_incorrect: i32,    // Total number of incorrect guesses.
-    total_percentage: f64, // Percentage guess correctly.
-    name: String,          // User's name, optional
-    smallest_vocab: i32,   // Size of the smallest vocab word to be tested.
+pub struct AwesomeProfile {
+    pub id: i32,
+    pub num_known: i32,
+    pub num_correct: i32,
+    pub num_incorrect: i32,
+    pub total_percentage: f64,
+    pub name: String,
+    pub smallest_vocab: i32,
 }
+
 
 #[Object]
 impl AwesomeProfile {
@@ -59,19 +118,50 @@ impl AwesomeProfile {
     }
 }
 
+/// Represents the statistical data related to the study of a specific vocabulary word.
+///
+/// This struct encapsulates the learning metrics for a particular vocabulary word, providing insight
+/// into the user's success rates. It includes the total number of attempts,
+/// the success rate, and the most recent changes in performance, giving a comprehensive view of
+/// the learning progress for that word.
+///
+/// # Fields
+///
+/// - `learning`: The vocabulary word being studied. This field represents the target word or phrase that the user is attempting to learn.
+/// - `attempts`: The total number of attempts made by the user to study or guess the `learning` word.
+/// This metric helps track the amount of effort put into learning the word.
+/// - `correct_attempts`: The number of successful attempts where the user correctly guessed or recalled
+/// the `learning` word. This measures the effectiveness of the learning process.
+/// - `percentage_correct`: The success rate for the `learning` word, calculated as the percentage of
+/// correct attempts out of the total attempts. This provides a quantitative measure of the user's mastery over the word.
+/// - `last_change`: Indicates the most recent change in the success rate (`percentage_correct`).
+/// This metric can help identify recent trends in the user's learning curve, such as improvements or setbacks.
+/// - `last_tested`: The timestamp of the last attempt to study the `learning` word. This field helps
+/// track the recency of the user's study efforts and can be used to prompt further review if too much time has elapsed.
+/// # Example
+///
+/// ```
+/// let vocab_stats = VocabStats {
+///     learning: String::from("palabra"),
+///     attempts: 10,
+///     correct_attempts: 8,
+///     percentage_correct: 80.0,
+///     last_change: 5.0,
+///     last_tested: String::from("2022-03-21 15:00:00"),
+/// };
+/// ```
 #[derive(Clone)]
-struct VocabStats {
-    learning: String,        // The word being studied.
-    attempts: i32,           // The number of times this vocab was attempted.
-    correct_attempts: i32,   // The number of times this vocab was correctly attempted.
-    percentage_correct: f64, // The percentage of correct guesses calculated using the distance from the correct match.
-    last_change: f64,        // The most recent percentage correct change
-    last_tested: String,     // The last time this pair was attempted.
+pub struct VocabStats {
+    pub learning: String,
+    pub attempts: i32,
+    pub correct_attempts: i32,
+    pub percentage_correct: f64,
+    pub last_change: f64,
+    pub last_tested: String,
 }
 
 #[Object]
 impl VocabStats {
-
     async fn learning(&self) -> String {
         self.learning.clone()
     }
@@ -95,7 +185,6 @@ impl VocabStats {
     async fn last_tested(&self) -> String {
         self.last_tested.clone()
     }
-
 }
 
 /// GraphQL Queries
@@ -103,7 +192,6 @@ pub struct QueryRoot;
 
 #[Object]
 impl QueryRoot {
-
     /// Fetches a list of vocab study challenges for a specified awesome person.
     ///
     /// This async function retrieves a set of vocab words for the awesome person to study,
@@ -182,13 +270,16 @@ impl QueryRoot {
     /// A `Result` wrapping a `VocabStats` struct containing detailed statistics about the study session on success,
     /// or an error string on failure.
     async fn get_vocab_stats(&self, vocab_study_id: i32) -> Result<VocabStats> {
-
         let match_service = VocabFuzzyMatch::instance();
 
         let (vocab_study, vocab) = match_service.get_vocab_stats(vocab_study_id)?;
 
         let last_tested = if vocab_study.last_tested.is_some() {
-            vocab_study.last_tested.unwrap().format("%Y-%m-%d %H:%M:%S %Z").to_string()
+            vocab_study
+                .last_tested
+                .unwrap()
+                .format("%Y-%m-%d %H:%M:%S %Z")
+                .to_string()
         } else {
             "".to_string()
         };
@@ -199,7 +290,7 @@ impl QueryRoot {
             correct_attempts: vocab_study.correct_attempts.unwrap_or_default(),
             percentage_correct: vocab_study.percentage_correct.unwrap_or_default(),
             last_change: vocab_study.last_change.unwrap_or_default(),
-            last_tested
+            last_tested,
         })
     }
 }
@@ -209,7 +300,6 @@ pub struct MutationRoot;
 
 #[Object]
 impl MutationRoot {
-
     /// Checks the user's response for a given vocabulary study session.
     ///
     /// This function compares the user's entered response against the correct answer for the specified vocabulary.
