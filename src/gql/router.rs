@@ -11,7 +11,7 @@ use crate::gql::studies::{QueryRoot, MutationRoot};
 
 /// Adds GraphiQL as a middleware for testing out queries and mutations.
 async fn graphiql() -> impl IntoResponse {
-    response::Html(GraphiQLSource::build().endpoint("/").finish())
+    response::Html(GraphiQLSource::build().endpoint("/gql").finish())
 }
 
 /// Starts the Axum web server with the GraphQL schema.
@@ -30,7 +30,7 @@ pub async fn start_axum(listener: TcpListener) {
     let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
         .finish();
 
-    let app = Router::new().route("/", get(graphiql).post_service(GraphQL::new(schema)));
+    let app = Router::new().route("/gql", get(graphiql).post_service(GraphQL::new(schema)));
 
     // Run the server with graceful shutdown
     axum::serve(listener, app)

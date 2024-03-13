@@ -58,7 +58,7 @@ type QueryRoot {
 	A `Result` containing a vector of `Challenge` structs on success, or an error message string on failure.
 	Each `Challenge` struct includes the vocab ID, vocab study ID, and the generated prompt.
 	"""
-	study(awesomeId: Int!, limit: Int!): [Challenge!]!
+	getStudyList(awesomeId: Int!, limit: Int!): [Challenge!]!
 	"""
 	Retrieves detailed profile information for an awesome person by their ID.
 	
