@@ -1,0 +1,36 @@
+{
+  getStudyList(awesomeId: 1, limit: 4) {
+    vocabId
+    vocabStudyId
+    prompt
+  }
+}
+
+{
+  getAwesomePerson(awesomeId: 1) {
+    id
+		numKnown
+  	numCorrect
+    numIncorrect
+    totalPercentage
+    name
+    smallestVocab
+  }
+}
+
+
+mutation {
+  checkResponse(vocabId: 115, vocabStudyId: 1139, entered: "pequeña")
+
+}
+
+{
+  getVocabStats(vocabStudyId: 1139) {
+    learning
+ 		attempts
+    correctAttempts
+    percentageCorrect
+    lastChange
+    lastTested
+  }
+}

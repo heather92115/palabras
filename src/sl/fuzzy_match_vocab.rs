@@ -450,12 +450,19 @@ impl LearnVocab for VocabFuzzyMatch {
         let last_change =
             updated_percentage_correct - current.percentage_correct.unwrap_or_default();
 
+        let correct_attempts = if distance.eq(&0) {
+            current.correct_attempts.unwrap_or_default() + 1
+        } else {
+            current.correct_attempts.unwrap_or_default()
+        };
+
         let updating = VocabStudy {
             percentage_correct: Option::from(updated_percentage_correct),
             last_change: Option::from(last_change),
             last_tested: Option::from(Utc::now()),
             well_known: updated_percentage_correct > WELL_KNOWN_THRESHOLD,
             attempts: Option::from(current.attempts.unwrap_or_default() + 1),
+            correct_attempts: Some(correct_attempts),
             ..current
         };
 

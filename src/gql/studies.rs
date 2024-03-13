@@ -207,7 +207,7 @@ impl QueryRoot {
     ///
     /// A `Result` containing a vector of `Challenge` structs on success, or an error message string on failure.
     /// Each `Challenge` struct includes the vocab ID, vocab study ID, and the generated prompt.
-    async fn study(&self, awesome_id: i32, limit: i64) -> Result<Vec<Challenge>> {
+    async fn get_study_list(&self, awesome_id: i32, limit: i64) -> Result<Vec<Challenge>> {
         let match_service = VocabFuzzyMatch::instance();
 
         let mut study_list: Vec<Challenge> = Vec::new();
