@@ -406,6 +406,8 @@ impl LearnVocab for VocabFuzzyMatch {
             return MAX_DISTANCE;
         }
 
+        let guess = guess.to_lowercase();
+
         let mut possible_matches: Vec<String> = alternatives
             .to_lowercase()
             .split(",")
