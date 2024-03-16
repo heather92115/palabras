@@ -7,6 +7,7 @@ use crate::schema::palabras::vocab::dsl::vocab;
 use diesel::prelude::*;
 use diesel::result::Error as DieselError;
 use diesel::{RunQueryDsl};
+use crate::schema::palabras::vocab::num_learning_words;
 
 /// The data mapping layer. Diesel is used to query and update vocab study.
 /// Connections are pulled from a static singleton pool for each operation.
@@ -56,6 +57,7 @@ pub trait VocabStudyRepository: Send + Sync {
     /// # Parameters
     ///
     /// - `ap_id`: The identifier of the awesome person for whom the study set is being retrieved.
+    /// - `max_words`: Max number of learning lang words to be included in study set
     ///
     /// # Returns
     ///
@@ -71,7 +73,7 @@ pub trait VocabStudyRepository: Send + Sync {
     /// This function will return an error if:
     /// - There is a problem connecting to the database.
     /// - The SQL query fails to execute properly.
-    fn get_study_set(&self, ap_id: i32) -> Result<Vec<(VocabStudy, Vocab)>, String>;
+    fn get_study_set(&self, ap_id: i32, max_words: i32) -> Result<Vec<(VocabStudy, Vocab)>, String>;
 
     /// Inserts a new `VocabStudy` record into the database.
     ///
@@ -158,12 +160,13 @@ impl VocabStudyRepository for DbVocabStudyRepository {
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn get_study_set(&self, ap_id: i32) -> Result<Vec<(VocabStudy, Vocab)>, String> {
+    fn get_study_set(&self, ap_id: i32, max_words: i32) -> Result<Vec<(VocabStudy, Vocab)>, String> {
         let mut conn = get_connection();
 
         let results = vocab_study
             .inner_join(vocab)
             .filter(awesome_person_id.eq(ap_id))
+            .filter(num_learning_words.le(max_words))
             .load::<(VocabStudy, Vocab)>(&mut conn)
             .map_err(|err| err.to_string())?;
 

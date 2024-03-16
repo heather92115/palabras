@@ -12,7 +12,15 @@ type AwesomeProfile {
 type Challenge {
 	vocabId: Int!
 	vocabStudyId: Int!
-	prompt: String!
+	firstLang: String!
+	infinitive: String!
+	pos: String!
+	hint: String!
+	numLearningWords: Int!
+	userNotes: String!
+	correctAttempts: Int!
+	knownLangCode: String!
+	learningLangCode: String!
 }
 
 

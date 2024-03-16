@@ -10,8 +10,8 @@ use crate::dal::file_access::load_buffer_from_file;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LanguageData {
     language_string: String,
-    learning_language: String,
-    from_language: String,
+    pub(crate) learning_language: String,
+    pub(crate) from_language: String,
     language_information: LanguageInformation,
     pub vocab_overview: Vec<VocabOverview>,
 }

@@ -1,4 +1,5 @@
 use dotenv;
+use rand::Rng;
 use palabras::dal::db_connection::verify_connection_migrate_db;
 use palabras::dal::awesome_person::{DbAwesomePersonRepository, AwesomePersonRepository};
 use palabras::models::{AwesomePerson, NewAwesomePerson};
@@ -54,9 +55,14 @@ fn test_create_awesome_person() {
     verify_connection_migrate_db();
     let repo = DbAwesomePersonRepository;
     let test_name = "Alice".to_string();
+    let unique_num = rand::thread_rng().gen_range(100000..=1000000000);
+    let sec_code= format!("test-code{}", unique_num);
 
     let awesome_person = NewAwesomePerson {
         name: Some(test_name.clone()),
+        sec_code,
+        max_learning_words: 2,
+
         ..Default::default()
     };
 
@@ -66,6 +72,14 @@ fn test_create_awesome_person() {
 
     let found = repo
         .get_awesome_person_by_id(created.id)
+        .expect("Should find newly created awesome person").unwrap_or_default();
+    assert_eq!(
+        found.id, created.id,
+        "Awesome person ids mismatched, expected {}, actual {}", created.id, found.id
+    );
+
+    let found = repo
+        .get_awesome_person_by_code(created.sec_code)
         .expect("Should find newly created awesome person").unwrap_or_default();
     assert_eq!(
         found.id, created.id,

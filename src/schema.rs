@@ -10,8 +10,9 @@ pub mod palabras {
             total_percentage -> Nullable<Float8>,
             updated -> Timestamptz,
             name -> Nullable<Varchar>,
-            code -> Nullable<Varchar>,
+            sec_code -> Varchar,
             smallest_vocab -> Int4,
+            max_learning_words -> Int4,
         }
     }
 
@@ -26,6 +27,9 @@ pub mod palabras {
             infinitive -> Nullable<Varchar>,
             pos -> Nullable<Varchar>,
             hint -> Nullable<Varchar>,
+            num_learning_words -> Int4,
+            known_lang_code -> Varchar,
+            learning_lang_code -> Varchar,
         }
     }
 

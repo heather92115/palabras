@@ -27,11 +27,11 @@ fn test_create_translation() {
         let alternatives = "comprobar, examinar, examinar".to_string();
         let updating = Vocab {
             alternatives: Some(alternatives.clone()),
-            ..created
+            ..created.clone()
         };
 
         let num_updated = repo
-            .update_vocab(updating)
+            .update_vocab(updating.clone())
             .expect("Update to previous create failed");
         assert_eq!(num_updated, 1, "Expected only one record to be updated");
 
@@ -47,6 +47,12 @@ fn test_create_translation() {
             by_learning_lang.alternatives.unwrap(),
             alternatives
         );
+
+        assert_eq!(by_learning_lang.learning_lang_code,
+                   updating.learning_lang_code,
+                   "learning_lang_code expected {}, actual{}",
+                   updating.learning_lang_code.clone(),
+                   created.learning_lang_code.clone());
 
         alternatives.clone().split(',').for_each(|alt| {
             let by_an_alternative = repo
@@ -117,6 +123,9 @@ pub fn test_new_vocab_instance() -> NewVocab {
         learning_lang,
         first_lang,
         skill: Some(INTEGRATION_TEST_SKILL.to_string()),
+        num_learning_words: 2,
+        known_lang_code: "en".to_string(),
+        learning_lang_code: "de".to_string(),
         ..Default::default()
     }
 }

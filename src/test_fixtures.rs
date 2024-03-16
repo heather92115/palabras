@@ -70,6 +70,9 @@ fn create_test_data() -> (VocabStudy, Vec<VocabStudy>, Vocab, Vec<Vocab>, Vec<(V
         infinitive: None,
         pos: Some("noun".to_string()),
         hint: None,
+        num_learning_words: 1,
+        known_lang_code: "en".to_string(),
+        learning_lang_code: "es".to_string(),
     };
 
     let vocab_list = vec![
@@ -97,8 +100,24 @@ impl AwesomePersonRepository for MockAwesomePersonRepository {
             total_percentage: Some(0.8),
             updated: chrono::Utc::now(),
             name: None,
-            code: None,
-            smallest_vocab: 0,
+            sec_code: "3456".to_string(),
+            smallest_vocab: 5,
+            max_learning_words: 5
+        }))
+    }
+
+    fn get_awesome_person_by_code(&self, lookup_code: String) -> Result<Option<AwesomePerson>, DieselError> {
+        Ok(Some(AwesomePerson {
+            id: 23,
+            num_known: Some(200),
+            num_correct: Some(180),
+            num_incorrect: Some(20),
+            total_percentage: Some(0.9),
+            updated: chrono::Utc::now(),
+            name: None,
+            sec_code: lookup_code,
+            smallest_vocab: 2,
+            max_learning_words: 5,
         }))
     }
 
@@ -117,6 +136,7 @@ impl AwesomePersonRepository for MockAwesomePersonRepository {
             num_incorrect: new_awesome_person.num_incorrect,
             total_percentage: new_awesome_person.total_percentage,
             name: new_awesome_person.name.clone(),
+            sec_code: "fsfd-df9a".to_string(),
             ..Default::default()
         })
     }
@@ -148,7 +168,7 @@ impl VocabStudyRepository for MockVocabStudyRepository {
         }))
     }
 
-    fn get_study_set(&self, _awesome_person_id: i32) -> Result<Vec<(VocabStudy, Vocab)>, String> {
+    fn get_study_set(&self, _awesome_person_id: i32, _max_words_in_phrase: i32) -> Result<Vec<(VocabStudy, Vocab)>, String> {
         Ok(self.combo_list.clone()) // returns our test data from mem
     }
 

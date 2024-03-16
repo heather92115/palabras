@@ -49,17 +49,20 @@ use crate::sl::duo_import::{LanguageData, load_vocab_from_json, VocabOverview};
 /// };
 ///
 /// let learning_phrase = "se acuerdan";
-/// let hint = determine_hint(&vocab_config, &learning_phrase).unwrap();
-/// assert_eq!(hint, "2, reflexive pronoun");
+/// let (hint, num_words) = determine_hint(&vocab_config, &learning_phrase);
+/// let hint = hint.unwrap_or_default();
+/// assert_eq!(hint, "phrase, reflexive pronoun");
+/// assert_eq!(num_words, 2);
 /// ```
 /// This example demonstrates how `determine_hint` generates a hint for the phrase "tú y yo", indicating that it contains
 /// two words and matches the "subject pronoun" category.
-pub fn determine_hint(vocab_config: &VocabConfig, learning: &str) -> Option<String> {
+pub fn determine_hint(vocab_config: &VocabConfig, learning: &str) -> (Option<String>, i32) {
     let binding = learning.to_lowercase();
     let words: Vec<&str> = binding.split_whitespace().collect();
+    let num_words = words.len() as i32;
 
-    if words.len() > 1 {
-        let mut hint = words.len().to_string();
+    if num_words > 1 {
+        let mut hint = "phrase".to_string();
 
         if let Some(pronouns) = &vocab_config.pronouns {
             for pronoun in pronouns {
@@ -70,9 +73,10 @@ pub fn determine_hint(vocab_config: &VocabConfig, learning: &str) -> Option<Stri
                 }
             }
         }
-        return Some(hint);
+        return (Some(hint), num_words);
     }
-    None
+
+    (None, num_words)
 }
 
 /// Merges additional learning material into the current translation pair.
@@ -196,8 +200,8 @@ pub fn merge(
         &vocab_config.plural_suffix.clone().unwrap_or_default(),
     );
 
-    // See if help will be needed to determine the correct learning lang
-    current.hint = determine_hint(vocab_config, &current.learning_lang);
+    // Add some help to determine the correct learning lang
+    (current.hint, current.num_learning_words) = determine_hint(vocab_config, &current.learning_lang);
 
     // Update the translation back to the first language if it wasn't already translated
     if current.first_lang.clone().is_empty() {
@@ -281,11 +285,13 @@ pub fn create(
     item: &VocabOverview,
     first: String,
     awesome_person_id: i32,
+    kn_lang: String,
+    ln_lang: String
 ) -> Result<(), String> {
     // Get the dal repo for translation pairs. It requires a database connection.
     let vocab_repo = DbVocabRepository;
     let learning_lang = item.word_string.clone();
-    let hint = determine_hint(vocab_config, &learning_lang);
+    let (hint, num_learning_words) = determine_hint(vocab_config, &learning_lang);
 
     let new_vocab = NewVocab {
         first_lang: first,
@@ -295,6 +301,9 @@ pub fn create(
         infinitive: Some(item.infinitive.clone().unwrap_or_default()),
         pos: Some(item.pos.clone().unwrap_or_default()),
         hint,
+        num_learning_words,
+        known_lang_code: kn_lang,
+        learning_lang_code: ln_lang,
         // Other fields use their default values
         ..Default::default()
     };
@@ -601,7 +610,15 @@ fn process_duo_vocab(
                 sync_vocab_study(vocab_id, awesome_id, item.strength)
                     .map_err(|err| err.to_string())?;
             }
-            Ok(None) => create(vocab_config, item, translated_first, awesome_id)?,
+            Ok(None) => create(
+                vocab_config,
+                item,
+                translated_first,
+                awesome_id,
+                vocabulary_overview.from_language.clone(),
+                vocabulary_overview.learning_language.clone(),
+            )?,
+
             Err(e) => return Err(e.to_string()),
         }
     }
@@ -835,6 +852,7 @@ mod tests {
     struct HintTestCase {
         learning_phrase: &'static str,
         expected_hint: &'static str,
+        expected_length: i32,
     }
 
     #[test]
@@ -868,40 +886,54 @@ mod tests {
         let test_cases = vec![
             HintTestCase {
                 learning_phrase: "usted hace",
-                expected_hint: "2, formal subject pronoun",
+                expected_hint: "phrase, formal subject pronoun",
+                expected_length: 2,
             },
             HintTestCase {
                 learning_phrase: "yo corro",
-                expected_hint: "2, subject pronoun",
+                expected_hint: "phrase, subject pronoun",
+                expected_length: 2,
             },
             HintTestCase {
                 learning_phrase: "ellos juegan en el parque",
-                expected_hint: "5, subject pronoun",
+                expected_hint: "phrase, subject pronoun",
+                expected_length: 5,
             },
             HintTestCase {
                 learning_phrase: "cómo se dice",
-                expected_hint: "3, reflexive pronoun",
+                expected_hint: "phrase, reflexive pronoun",
+                expected_length: 3,
             },
             HintTestCase {
                 learning_phrase: "fáciles",
                 expected_hint: "",
+                expected_length: 1,
             },
             HintTestCase {
                 learning_phrase: "especial del día",
-                expected_hint: "3",
+                expected_hint: "phrase",
+                expected_length: 3,
             },
             HintTestCase {
                 learning_phrase: "no lo sé",
-                expected_hint: "3, object pronoun",
+                expected_hint: "phrase, object pronoun",
+                expected_length: 3,
             },
         ];
 
         for test_case in test_cases {
-            let hint = determine_hint(&vocab_config, test_case.learning_phrase).unwrap_or_default();
+            let (hint, num_learning_words) = determine_hint(&vocab_config, test_case.learning_phrase);
+            let hint = hint.unwrap_or_default();
             assert_eq!(
                 hint, test_case.expected_hint,
                 "Failed on learning_phrase: {:?}",
                 test_case.learning_phrase
+            );
+            assert_eq!(
+                num_learning_words, test_case.expected_length,
+                "Word count mismatch, expected {}, actual {}",
+                test_case.expected_length,
+                num_learning_words
             );
         }
     }
