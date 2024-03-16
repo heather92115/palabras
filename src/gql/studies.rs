@@ -14,24 +14,28 @@ use async_graphql::*;
 /// word or phrase in the study material.
 /// - `vocab_study_id`: The unique identifier for the user's study history with this vocabulary item,
 /// allowing for tracking of progress and retrieval of user-specific study data.
-/// - `prompt`: The question or challenge presented to the user, designed to elicit the correct response or
-/// translation based on the vocabulary being studied.
-///
-/// # Example
-///
-/// ```
-/// use palabras::gql::studies::Challenge;
-/// let challenge = Challenge {
-///     vocab_id: 42,
-///     vocab_study_id: 101,
-///     prompt: String::from("Translate: 'you travel'    pos: Verb"),
-/// };
-/// ```
+/// - `first_lang`: The translation of the word or phrase into the user's first language, used as a prompt.
+/// - `infinitive`: Optional. For verbs, the infinitive form of the word. Empty for non-verb vocabulary items.
+/// - `pos`: Optional. The part of speech of the vocabulary item, aiding in the application of grammatical rules.
+/// - `hint`: Optional. A hint provided to assist users in translating the word or phrase.
+/// - `num_learning_words`: The number of words contained in the `learning_lang` field, calculated for analytical purposes.
+/// - `user_notes`: Optional notes added by the user to aid in recall or provide additional context for the vocabulary word
+/// - `correct_attempts`: The number of times the vocabulary word was guessed or recalled correctly by the user.
+/// - `known_lang_code`: Language code for this known language.
+/// - `learning_lang_code`: Language code for this learning language.
 #[derive(Clone)]
 pub struct Challenge {
     pub vocab_id: i32,
     pub vocab_study_id: i32,
-    pub prompt: String,
+    pub first_lang: String,
+    pub infinitive: String,
+    pub pos: String,
+    pub hint: String,
+    pub num_learning_words: i32,
+    pub user_notes: String,
+    pub correct_attempts: i32,
+    pub known_lang_code: String,
+    pub learning_lang_code: String,
 }
 
 #[Object]
@@ -44,8 +48,34 @@ impl Challenge {
         self.vocab_study_id
     }
 
-    async fn prompt(&self) -> String {
-        self.prompt.clone()
+    async fn first_lang(&self) -> String {
+        self.first_lang.clone()
+    }
+    async fn infinitive(&self) -> String {
+        self.infinitive.clone()
+    }
+    async fn pos(&self) -> String {
+        self.pos.clone()
+    }
+    async fn hint(&self) -> String {
+        self.hint.clone()
+    }
+    async fn num_learning_words(&self) -> i32 {
+        self.num_learning_words.clone()
+    }
+    async fn user_notes(&self) -> String {
+        self.user_notes.clone()
+    }
+    async fn correct_attempts(&self) -> i32 {
+        self.correct_attempts.clone()
+    }
+
+    async fn known_lang_code(&self) -> String {
+        self.known_lang_code.clone()
+    }
+
+    async fn learning_lang_code(&self) -> String {
+        self.learning_lang_code.clone()
     }
 }
 
@@ -214,11 +244,18 @@ impl QueryRoot {
 
         let vocab = match_service.get_vocab_to_learn(awesome_id, limit)?;
         for (vs, v) in vocab {
-            let prompt = match_service.determine_prompt(&v, &vs.user_notes.unwrap_or_default());
             study_list.push(Challenge {
                 vocab_id: v.id,
                 vocab_study_id: vs.id,
-                prompt,
+                first_lang: v.first_lang,
+                infinitive: v.infinitive.unwrap_or_default(),
+                pos: v.pos.unwrap_or_default(),
+                hint: v.hint.unwrap_or_default(),
+                num_learning_words: v.num_learning_words,
+                user_notes: vs.user_notes.unwrap_or_default(),
+                correct_attempts: vs.correct_attempts.unwrap_or_default(),
+                known_lang_code: v.known_lang_code,
+                learning_lang_code: v.learning_lang_code,
             });
         }
 

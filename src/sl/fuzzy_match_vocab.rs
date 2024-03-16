@@ -230,6 +230,18 @@ pub trait LearnVocab {
     /// Ok(None) if not found or an error if the query fails.
     fn get_awesome_person(&self, awesome_person_id: i32) -> Result<Option<AwesomePerson>, String>;
 
+    /// Retrieves a single awesome person record by its unique code field.
+    ///
+    /// # Parameters
+    ///
+    /// * `look_up_code` - (`code`) of the awesome person record to retrieve.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(Some(AwesomePerson))` if an awesome person record with the specified `id` exists,
+    /// Ok(None) if not found or an error if the query fails.
+    fn get_awesome_person_by_code(&self, look_up_code: String) -> Result<Option<AwesomePerson>, String>;
+
     /// Retrieves a single tuple of vocab study and vocab by the vocab study id.
     ///
     /// # Parameters
@@ -290,8 +302,15 @@ impl LearnVocab for VocabFuzzyMatch {
         awesome_id: i32,
         limit: i64,
     ) -> Result<Vec<(VocabStudy, Vocab)>, String> {
+
+        let ap = self.awesome_person_repo.get_awesome_person_by_id(awesome_id).unwrap_or_default();
+        if ap.is_none() {
+            return Err(format!("Failed to find awesome person with id {}", awesome_id));
+        }
+        let max_words_in_phrase = ap.unwrap().max_learning_words;
+
         // TODO limit the number of results returned by the db, perhaps with a MV.
-        let study_set = self.vocab_study_repo.get_study_set(awesome_id)?;
+        let study_set = self.vocab_study_repo.get_study_set(awesome_id, max_words_in_phrase)?;
 
         // Separate tuples into two groups for prioritization.
         let (mut target_group, secondary_group): (Vec<_>, Vec<_>) = study_set
@@ -585,9 +604,28 @@ impl LearnVocab for VocabFuzzyMatch {
             .get_awesome_person_by_id(awesome_person_id)
             .map_err(|e| e.to_string())?;
 
-        // Get sec matters private
+        // Keep sec matters private
         let pub_awesome_person = AwesomePerson {
-            code: Some("".to_string()),
+            sec_code: "".to_string(),
+            ..awesome_person.unwrap_or_default()
+        };
+
+        Ok(Some(pub_awesome_person))
+    }
+
+    /// Implementation, see trait for details [`LearnVocab::get_awesome_person_by_code`]
+    ///
+    /// For advanced usage and mock implementations, please refer to
+    /// the integration tests in this module.
+    fn get_awesome_person_by_code(&self, look_up_code: String) -> Result<Option<AwesomePerson>, String> {
+        let awesome_person = self
+            .awesome_person_repo
+            .get_awesome_person_by_code(look_up_code)
+            .map_err(|e| e.to_string())?;
+
+        // Keep sec matters private
+        let pub_awesome_person = AwesomePerson {
+            sec_code: "".to_string(),
             ..awesome_person.unwrap_or_default()
         };
 
