@@ -19,7 +19,6 @@ use serde::Deserialize;
 /// // This config will attempt combine similar words
 /// use palabras::config::VocabConfig;
 /// let config = VocabConfig {
-///     vocab_json_file_name: "vocab.json".to_string(),
 ///     plural_suffix: Some("s".to_string()),
 ///     non_verb_matching_suffixes: Some("o,a,os,as,e,es".to_string()),
 ///     pronouns: None
@@ -27,7 +26,6 @@ use serde::Deserialize;
 ///
 /// // This config will not combine similar words
 /// let config = VocabConfig {
-///     vocab_json_file_name: "vocab.json".to_string(),
 ///     plural_suffix: None,
 ///     non_verb_matching_suffixes: None,
 ///     pronouns: None
@@ -46,7 +44,6 @@ pub struct Pronoun {
 
 #[derive(Deserialize)]
 pub struct VocabConfig {
-    pub vocab_json_file_name: String,
     pub plural_suffix: Option<String>,
     pub non_verb_matching_suffixes: Option<String>,
     pub pronouns: Option<Vec<Pronoun>>
@@ -72,18 +69,6 @@ static VOCAB_CONFIG_FILENAME: &str = "vocab_config.json";
 /// - The `vocab_config.json` file does not exist.
 /// - There is an issue reading the file.
 /// - The JSON data in the file does not match the `VocabConfig` structure.
-///
-/// # Example
-///
-/// Assuming `vocab_config.json` exists and contains valid configuration data:
-///
-/// ```
-/// use palabras::config::load_vocab_config;
-/// match load_vocab_config() {
-///     Ok(config) => println!("Successfully loaded config for file: {}", config.vocab_json_file_name),
-///     Err(e) => println!("Error loading vocab config: {}", e),
-/// }
-/// ```
 ///
 /// This example shows how to call `load_vocab_config` to load the Duolingo vocabulary configuration.
 /// It handles the result by printing the loaded configuration on success or an error message on failure.

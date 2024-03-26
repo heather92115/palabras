@@ -16,9 +16,6 @@ To update the project:
 # Database Setup
 [DB Setup](docs/db.md)
 
-# Import your vocab from duolingo json and get translations
-[How to Import your Vocab from DuoLingo](docs/imports.md)
-
 # Testing
 [Running Tests](docs/testing.md)
 
