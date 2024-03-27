@@ -29,13 +29,12 @@ _Note: there is a lot of variance allowed here other than the
 name of the schema needs to be 'palabras' and the user needs to be able to 
 alter the schema._
 
-## Step 3: Create a .env file with the DB URL
+## Step 3: Create a .env file with env vars for db connectivity
 ```zsh
-echo "export PALABRA_DATABASE_URL='postgres://developer:************@0.0.0.0/palabras'" > .env
+echo "export PAL_DB_LINK='some/Link/On/Aws'" > .env
+echo "export PAL_REGION='us-east-1'" >> .env
+echo "export PAL_DATABASE_URL='postgres://developer:************@0.0.0.0/palabras'" >> .env
 ```
-_Note: Don't source the env files if you plan to switch between prod and testing. The command line shell's env vars will override
-the loaded .env file values._
-
 
 # Integration Testing
 Repeat the previous steps with slight alterations:
@@ -55,14 +54,5 @@ ALTER ROLE tester SET search_path TO palabras;
 
 ## Step 3: Create a test.env file with the DB URL
 ```zsh
-echo "export PALABRA_DATABASE_URL='postgres://tester:************@0.0.0.0:5433/palabras'" > testing.env
-```
-_Note: Don't source the env files if you plan to switch between prod and testing. The command line shell's env vars will override
-the loaded .env file values._
-
-# Install Postges via Docker or another method
-```zsh
-docker pull postgres
-docker run -d -t -e POSTGRES_PASSWORD="$PGPASSWORD" -v "$DOCKER_VOLUMES"/pg/data -p 5432:5432 postgres
-docker run --name test_postgres -d -t -e POSTGRES_PASSWORD="$TEST_PGPASSWORD" -v "$DOCKER_VOLUMES"/pg2/data -p 5433:5432 postgres
+echo "export PAL_TEST_DATABASE_URL='postgres://tester:************@0.0.0.0:5433/palabras'" >> .env
 ```
