@@ -1,11 +1,9 @@
-
 #[cfg(test)]
 use crate::dal::awesome_person::AwesomePersonRepository;
-use crate::dal::vocab_study::VocabStudyRepository;
-use crate::models::{AwesomePerson, NewAwesomePerson, NewVocab, Vocab, VocabStudy};
-use crate::models::{NewVocabStudy};
-use diesel::result::Error as DieselError;
 use crate::dal::vocab::VocabRepository;
+use crate::dal::vocab_study::VocabStudyRepository;
+use crate::models::NewVocabStudy;
+use crate::models::{AwesomePerson, NewAwesomePerson, NewVocab, Vocab, VocabStudy};
 use crate::sl::fuzzy_match_vocab::VocabFuzzyMatch;
 
 pub struct TestFixtures {
@@ -15,33 +13,34 @@ pub struct TestFixtures {
 // Create a mocked fuzzy service for unit tests. Repos are mocked
 // and return test data
 pub fn fixture_setup() -> TestFixtures {
-
     let awesome_person_repo = Box::new(MockAwesomePersonRepository);
 
-    let (vocab_study, vocab_study_list, vocab, vocab_list, combo_list)
-        = create_test_data();
+    let (vocab_study, vocab_study_list, vocab, vocab_list, combo_list) = create_test_data();
 
     let vocab_study_repo = Box::new(MockVocabStudyRepository {
-        vocab_study, vocab_study_list, combo_list
+        vocab_study,
+        vocab_study_list,
+        combo_list,
     });
 
-    let vocab_repo = Box::new(MockVocabRepository {
-        vocab, vocab_list
-    });
+    let vocab_repo = Box::new(MockVocabRepository { vocab, vocab_list });
 
     let fuzzy_service = Box::new(VocabFuzzyMatch::new(
         awesome_person_repo,
         vocab_study_repo,
-        vocab_repo
+        vocab_repo,
     ));
 
-    TestFixtures {
-        fuzzy_service
-    }
+    TestFixtures { fuzzy_service }
 }
 
-fn create_test_data() -> (VocabStudy, Vec<VocabStudy>, Vocab, Vec<Vocab>, Vec<(VocabStudy, Vocab)>) {
-
+fn create_test_data() -> (
+    VocabStudy,
+    Vec<VocabStudy>,
+    Vocab,
+    Vec<Vocab>,
+    Vec<(VocabStudy, Vocab)>,
+) {
     let vocab_study = VocabStudy {
         id: 1,
         vocab_id: 1,
@@ -53,12 +52,10 @@ fn create_test_data() -> (VocabStudy, Vec<VocabStudy>, Vocab, Vec<Vocab>, Vec<(V
         last_tested: None,
         well_known: true,
         user_notes: None,
-        correct_attempts: None
+        correct_attempts: None,
     };
 
-    let vocab_study_list = vec![
-        vocab_study.clone()
-    ];
+    let vocab_study_list = vec![vocab_study.clone()];
 
     let vocab = Vocab {
         id: 1,
@@ -75,14 +72,9 @@ fn create_test_data() -> (VocabStudy, Vec<VocabStudy>, Vocab, Vec<Vocab>, Vec<(V
         learning_lang_code: "es".to_string(),
     };
 
-    let vocab_list = vec![
-        vocab.clone()
-    ];
+    let vocab_list = vec![vocab.clone()];
 
-    let combo_list = vec![
-        (vocab_study.clone(), vocab.clone())
-    ];
-
+    let combo_list = vec![(vocab_study.clone(), vocab.clone())];
 
     (vocab_study, vocab_study_list, vocab, vocab_list, combo_list)
 }
@@ -91,7 +83,7 @@ fn create_test_data() -> (VocabStudy, Vec<VocabStudy>, Vocab, Vec<Vocab>, Vec<(V
 pub struct MockAwesomePersonRepository;
 
 impl AwesomePersonRepository for MockAwesomePersonRepository {
-    fn get_awesome_person_by_id(&self, stats_id: i32) -> Result<Option<AwesomePerson>, DieselError> {
+    fn get_awesome_person_by_id(&self, stats_id: i32) -> Result<Option<AwesomePerson>, String> {
         Ok(Some(AwesomePerson {
             id: stats_id,
             num_known: Some(100),
@@ -102,11 +94,14 @@ impl AwesomePersonRepository for MockAwesomePersonRepository {
             name: None,
             sec_code: "3456".to_string(),
             smallest_vocab: 5,
-            max_learning_words: 5
+            max_learning_words: 5,
         }))
     }
 
-    fn get_awesome_person_by_code(&self, lookup_code: String) -> Result<Option<AwesomePerson>, DieselError> {
+    fn get_awesome_person_by_code(
+        &self,
+        lookup_code: String,
+    ) -> Result<Option<AwesomePerson>, String> {
         Ok(Some(AwesomePerson {
             id: 23,
             num_known: Some(200),
@@ -143,15 +138,15 @@ impl AwesomePersonRepository for MockAwesomePersonRepository {
 }
 
 // Mock struct for VocabStudyRepository
-pub struct MockVocabStudyRepository  {
+pub struct MockVocabStudyRepository {
     pub vocab_study: VocabStudy,
     pub vocab_study_list: Vec<VocabStudy>,
-    pub combo_list: Vec<(VocabStudy, Vocab)>
+    pub combo_list: Vec<(VocabStudy, Vocab)>,
 }
 
 // Mock implementation of VocabRepository
 impl VocabStudyRepository for MockVocabStudyRepository {
-    fn get_vocab_study_by_id(&self, vocab_id: i32) -> Result<VocabStudy, DieselError> {
+    fn get_vocab_study_by_id(&self, vocab_id: i32) -> Result<VocabStudy, String> {
         // Mock behavior: returns our previously setup test data
         Ok(VocabStudy {
             id: vocab_id,
@@ -159,7 +154,11 @@ impl VocabStudyRepository for MockVocabStudyRepository {
         })
     }
 
-    fn get_vocab_study_by_foreign_refs(&self, vocab_id: i32, awesome_person_id: i32) -> Result<Option<VocabStudy>, DieselError> {
+    fn get_vocab_study_by_foreign_refs(
+        &self,
+        vocab_id: i32,
+        awesome_person_id: i32,
+    ) -> Result<Option<VocabStudy>, String> {
         // Mock behavior: Return an Ok result
         Ok(Some(VocabStudy {
             vocab_id,
@@ -168,16 +167,16 @@ impl VocabStudyRepository for MockVocabStudyRepository {
         }))
     }
 
-    fn get_study_set(&self, _awesome_person_id: i32, _max_words_in_phrase: i32) -> Result<Vec<(VocabStudy, Vocab)>, String> {
+    fn get_study_set(
+        &self,
+        _awesome_person_id: i32,
+        _max_words_in_phrase: i32,
+    ) -> Result<Vec<(VocabStudy, Vocab)>, String> {
         Ok(self.combo_list.clone()) // returns our test data from mem
     }
 
-    fn create_vocab_study(
-        &self,
-        new_vocab_study: &NewVocabStudy,
-    ) -> Result<VocabStudy, String> {
-
-        let vocab_study = VocabStudy{
+    fn create_vocab_study(&self, new_vocab_study: &NewVocabStudy) -> Result<VocabStudy, String> {
+        let vocab_study = VocabStudy {
             id: 2,
             vocab_id: new_vocab_study.vocab_id.clone(),
             awesome_person_id: new_vocab_study.awesome_person_id.clone(),
@@ -200,39 +199,42 @@ pub struct MockVocabRepository {
 
 // Mock implementation of VocabRepository
 impl VocabRepository for MockVocabRepository {
-    fn get_vocab_by_id(&self, vocab_id: i32) -> Result<Vocab, DieselError> {
-        Ok( Vocab{
+    fn get_vocab_by_id(&self, vocab_id: i32) -> Result<Vocab, String> {
+        Ok(Vocab {
             id: vocab_id,
             ..self.vocab.clone()
         })
     }
 
-    fn find_vocab_by_learning_language(&self, learning_lang_search: String) -> Result<Option<Vocab>, DieselError> {
-        Ok(Some(Vocab{
+    fn find_vocab_by_learning_language(
+        &self,
+        learning_lang_search: String,
+    ) -> Result<Option<Vocab>, String> {
+        Ok(Some(Vocab {
             learning_lang: learning_lang_search,
             ..self.vocab.clone()
         }))
     }
 
-    fn find_vocab_by_alternative(&self, alternative_search: String) -> Result<Option<Vocab>, DieselError> {
-        Ok(Some(Vocab{
+    fn find_vocab_by_alternative(
+        &self,
+        alternative_search: String,
+    ) -> Result<Option<Vocab>, String> {
+        Ok(Some(Vocab {
             alternatives: Some(alternative_search),
             ..self.vocab.clone()
         }))
     }
 
     fn get_empty_first_lang(&self, _limit: i64) -> Result<Vec<Vocab>, String> {
-        Ok(vec![
-            Vocab {
-                first_lang: "".to_string(),
-                ..self.vocab.clone()
-            }
-        ])
+        Ok(vec![Vocab {
+            first_lang: "".to_string(),
+            ..self.vocab.clone()
+        }])
     }
 
     fn create_vocab(&self, new_vocab: &NewVocab) -> Result<Vocab, String> {
-
-        let vocab = Vocab{
+        let vocab = Vocab {
             learning_lang: new_vocab.learning_lang.clone(),
             first_lang: new_vocab.first_lang.clone(),
             alternatives: new_vocab.alternatives.clone(),

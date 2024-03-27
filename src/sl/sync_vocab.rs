@@ -1,15 +1,13 @@
 use crate::config::{TranslationsConfig, VocabConfig};
-use crate::dal::file_access::{
-    find_first_lang_translations, write_missing_first_export,
-};
+use crate::dal::awesome_person::{AwesomePersonRepository, DbAwesomePersonRepository};
+use crate::dal::file_access::{find_first_lang_translations, write_missing_first_export};
 use crate::dal::vocab::{DbVocabRepository, VocabRepository};
 use crate::dal::vocab_study::{DbVocabStudyRepository, VocabStudyRepository};
 use crate::models::{AwesomePerson, NewVocabStudy, Vocab};
-use crate::sl::fuzzy_match_vocab::{WELL_KNOWN_THRESHOLD};
+use crate::sl::fuzzy_match_vocab::WELL_KNOWN_THRESHOLD;
 use diesel::result::Error as DieselError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::dal::awesome_person::{AwesomePersonRepository, DbAwesomePersonRepository};
 
 /// Determines hints for a given phrase by analyzing its length and the presence of specific pronouns.
 ///
@@ -108,11 +106,7 @@ pub fn determine_hint(vocab_config: &VocabConfig, learning: &str) -> (Option<Str
 /// assert_eq!(pair.learning_lang, "cat");
 /// assert_eq!(pair.alternatives, Some("cats, kitty".to_string()));
 /// ```
-pub fn merge_learning(
-    current: &mut Vocab,
-    additional_learning: String,
-    plural_suffix: &str,
-) {
+pub fn merge_learning(current: &mut Vocab, additional_learning: String, plural_suffix: &str) {
     if current.learning_lang.ne(&additional_learning) {
         // See if the learning lang is in plural form and should be swapped with the new word.
         let (learning, additional) = if current
@@ -139,7 +133,6 @@ pub fn merge_learning(
 }
 
 pub fn create_vocab_study(vocab_id: i32, awesome_id: i32, percentage: f64) -> Result<(), String> {
-
     let vocab_study_repo = DbVocabStudyRepository;
 
     let new_vocab_study = NewVocabStudy {
@@ -152,13 +145,10 @@ pub fn create_vocab_study(vocab_id: i32, awesome_id: i32, percentage: f64) -> Re
         ..Default::default()
     };
 
-    vocab_study_repo.create_vocab_study(&new_vocab_study)
-        .map_err(|err| err.to_string())?;
+    vocab_study_repo.create_vocab_study(&new_vocab_study)?;
 
     Ok(())
 }
-
-
 
 /// Searches for a translation pair with a word similar to `learning_lang`, differing only by specified suffixes.
 ///
@@ -237,9 +227,7 @@ fn _find_similar(
                 let alt_word = format!("{}{}", stem, alt_suffix); // ex: gat becomes gata, gatos, gatas
 
                 // Attempt to search for a translation pair using the newly contructed alternative
-                if let Ok(Some(vocab)) =
-                    vocab_repo.find_vocab_by_learning_language(alt_word)
-                {
+                if let Ok(Some(vocab)) = vocab_repo.find_vocab_by_learning_language(alt_word) {
                     return Ok(Some(vocab)); // Found a similar word form, return it
                 }
             }
@@ -342,19 +330,19 @@ pub fn load_translations(
 /// * `Ok(AwesomePerson)` if the `AwesomePerson` is found.
 /// * `Err(String)` if no `AwesomePerson` is found, with a message including the ID.
 pub fn verify_awesome_person(awesome_person_id: i32) -> Result<AwesomePerson, String> {
-
     let repo = DbAwesomePersonRepository;
 
-    let awesome_person
-        = repo.get_awesome_person_by_id(awesome_person_id).map_err(|e| e.to_string())?;
+    let awesome_person = repo.get_awesome_person_by_id(awesome_person_id)?;
 
     if awesome_person.is_none() {
-        Err(format!("No Awesome person was found with id {}", awesome_person_id))
+        Err(format!(
+            "No Awesome person was found with id {}",
+            awesome_person_id
+        ))
     } else {
         Ok(awesome_person.unwrap())
     }
 }
-
 
 /// Exports translation pairs with missing "first language" fields to a CSV file.
 ///

@@ -1,3 +1,4 @@
+pub mod aws;
 pub mod config;
 pub mod dal;
 pub mod gql;

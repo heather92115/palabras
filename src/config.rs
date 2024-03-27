@@ -39,14 +39,14 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct Pronoun {
     pub name: String,
-    pub instances: String
+    pub instances: String,
 }
 
 #[derive(Deserialize)]
 pub struct VocabConfig {
     pub plural_suffix: Option<String>,
     pub non_verb_matching_suffixes: Option<String>,
-    pub pronouns: Option<Vec<Pronoun>>
+    pub pronouns: Option<Vec<Pronoun>>,
 }
 
 static VOCAB_CONFIG_FILENAME: &str = "vocab_config.json";

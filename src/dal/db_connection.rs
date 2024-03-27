@@ -1,9 +1,10 @@
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager, PooledConnection};
+use diesel::result::Error as DieselError;
 use diesel::sql_query;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use lazy_static::lazy_static;
-use std::env;
+use std::sync::Mutex;
 
 /// Creates a database pool of Postgres connections. The pool is lazy loaded and available globally.
 /// Environment variable DATABASE_URL is required for PROD and TEST_DATABASE_URL is required for Tests.
@@ -34,21 +35,13 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 /// which reads database configuration from environment variables and sets up the pool accordingly.
 type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-pub fn get_database_url() -> String {
-    env::var("DATABASE_URL").expect("DATABASE_URL must be set")
-}
-
 lazy_static! {
-    /// Global instance of the database connection pool.
+    /// Global instance of a Mutex wrapping an optional database connection pool.
     ///
-    /// This static reference to a `DbPool` is initialized using `lazy_static!` to ensure thread-safe,
-    /// one-time initialization. It provides a convenient way to access the database connection pool
-    /// from anywhere in the application without needing to pass the pool through function arguments.
-    ///
-    /// The pool is configured and instantiated at application startup, using the `establish_connection_pool`
-    /// function. It reads the database configuration from environment variables and sets up the pool,
-    /// which can then be used to get database connections.
-    pub static ref POOL: DbPool = establish_connection_pool(get_database_url());
+    /// Initially, the pool is set to None and must be explicitly initialized at runtime
+    /// after the DATABASE_URL is known. The use of `Mutex` ensures thread-safe access
+    /// and modification of the global pool.
+    pub static ref POOL: Mutex<Option<DbPool>> = Mutex::new(None);
 }
 
 /// Establishes and returns a database connection pool using the `DATABASE_URL` environment variable.
@@ -57,38 +50,37 @@ lazy_static! {
 /// initializes a connection manager with it, and then sets up a connection pool for use throughout
 /// the application. The connection pool is configured with default settings.
 ///
+/// Initially, the pool is set to None and must be explicitly initialized at runtime
+/// after the DATABASE_URL is known. The use of `Mutex` ensures thread-safe access
+/// and modification of the global pool.
+///
 /// # Panics
 ///
 /// Panics if:
 /// - The `DATABASE_URL` environment variable is not set.
 /// - The connection pool cannot be created due to configuration errors or connection issues.
 ///
-/// # Returns
-///
-/// A `DbPool` (an `r2d2::Pool` of `ConnectionManager<PgConnection>`) that manages database connections,
-/// ready to be used for executing database operations.
-///
 /// # Example Usage
 ///
 /// use std::env;
 /// dotenv::from_filename("test.env").ok();
 /// use palabras::dal::db_connection::{establish_connection_pool, get_database_url};
-/// let pool = establish_connection_pool(get_database_url());
-/// // Now you can use `pool` to get database connections.
+/// establish_connection_pool(get_database_url());
 ///
-/// Ensure that the `DATABASE_URL` environment variable is correctly set in your environment before
+/// Ensure that the `DATABASE_URL` environment variable, if you are using this method, before
 /// calling this function, for example:
 ///
 /// ```sh
 /// export DATABASE_URL=postgres://username:password@localhost/mydatabase
 /// ```
-///
-/// Note: Adjust the DATABASE_URL to match your database credentials and server details.
-pub fn establish_connection_pool(db_url: String) -> DbPool {
+pub fn establish_connection_pool(db_url: String) {
     let manager = ConnectionManager::<PgConnection>::new(db_url);
-    r2d2::Pool::builder()
+    let pool = r2d2::Pool::builder()
         .build(manager)
-        .expect("Failed to create pool.")
+        .expect("Failed to create pool.");
+
+    let mut global_pool = POOL.lock().unwrap();
+    *global_pool = Some(pool);
 }
 
 /// Verifies database connectivity and runs pending Diesel migrations.
@@ -103,10 +95,11 @@ pub fn establish_connection_pool(db_url: String) -> DbPool {
 /// - A database connection cannot be established.
 /// - The simple query check fails.
 /// - Running migrations fails due to errors in the migration files or database issues.
-pub fn verify_connection_migrate_db() {
-    let mut conn = get_connection();
-    query_check(&mut conn).expect("DB connections should have worked.");
-    run_pending_migrations(&mut conn).expect("Any required migrations should have completed.");
+pub fn verify_connection_migrate_db() -> Result<(), String> {
+    let mut conn = get_connection()?;
+    query_check(&mut conn).map_err(|err| err.to_string())?;
+    run_pending_migrations(&mut conn).map_err(|err| err.to_string())?;
+    Ok(())
 }
 
 /// Fetches a database connection from the global connection pool.
@@ -124,9 +117,17 @@ pub fn verify_connection_migrate_db() {
 ///
 /// A `PooledConnection<ConnectionManager<PgConnection>>`, which is a managed connection
 /// that will be returned to the pool once it goes out of scope.
-pub fn get_connection() -> PooledConnection<ConnectionManager<PgConnection>> {
-    POOL.get()
-        .expect("Failed to get a connection from the pool.")
+pub fn get_connection() -> Result<PooledConnection<ConnectionManager<PgConnection>>, String> {
+    let life_guard = POOL.lock().map_err(|err| err.to_string())?;
+    if let Some(ref pool) = *life_guard {
+        Ok(pool.get().map_err(|err| err.to_string())?)
+    } else {
+        Err("Database connection problem ".to_string())
+    }
+}
+
+pub fn error_to_string(diesel_error: DieselError) -> String {
+    diesel_error.to_string()
 }
 
 /// Executes pending Diesel migrations against the database.

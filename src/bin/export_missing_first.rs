@@ -1,5 +1,6 @@
 use dotenv::dotenv;
-use palabras::dal::db_connection::verify_connection_migrate_db;
+use palabras::aws::glue::find_the_database;
+use palabras::dal::db_connection::{establish_connection_pool, verify_connection_migrate_db};
 use palabras::sl::sync_vocab::export_missing_first_lang_pairs;
 use std::env;
 use std::error::Error;
@@ -14,10 +15,7 @@ use std::error::Error;
 /// Vocab words with missing first language fields are exported, no matter what user uploaded them.
 ///
 /// # Environment
-///
-/// The function reads the `PALABRA_DATABASE_URL` environment variable to establish a
-/// database connection. Environment variables should be defined in a `.env` file located
-/// in the same directory as the binary.
+/// See the documentation of [`main`].
 ///
 /// # Arguments
 ///
@@ -48,10 +46,12 @@ use std::error::Error;
 ///
 /// Note: This function is designed to be run as a standalone tool. It should be invoked from
 /// the command line with the necessary environment configuration in place.
-fn main() -> Result<(), Box<dyn Error>> {
-    // Returning the PROD database URL defined in the env var: PALABRA_DATABASE_URL
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok(); // Load environment variables from .env file
-    verify_connection_migrate_db();
+    let db_url = find_the_database().await;
+    establish_connection_pool(db_url);
+    verify_connection_migrate_db()?;
 
     let args: Vec<String> = env::args().collect();
 

@@ -240,7 +240,10 @@ pub trait LearnVocab {
     ///
     /// Returns `Ok(Some(AwesomePerson))` if an awesome person record with the specified `id` exists,
     /// Ok(None) if not found or an error if the query fails.
-    fn get_awesome_person_by_code(&self, look_up_code: String) -> Result<Option<AwesomePerson>, String>;
+    fn get_awesome_person_by_code(
+        &self,
+        look_up_code: String,
+    ) -> Result<Option<AwesomePerson>, String>;
 
     /// Retrieves a single tuple of vocab study and vocab by the vocab study id.
     ///
@@ -302,15 +305,22 @@ impl LearnVocab for VocabFuzzyMatch {
         awesome_id: i32,
         limit: i64,
     ) -> Result<Vec<(VocabStudy, Vocab)>, String> {
-
-        let ap = self.awesome_person_repo.get_awesome_person_by_id(awesome_id).unwrap_or_default();
+        let ap = self
+            .awesome_person_repo
+            .get_awesome_person_by_id(awesome_id)
+            .unwrap_or_default();
         if ap.is_none() {
-            return Err(format!("Failed to find awesome person with id {}", awesome_id));
+            return Err(format!(
+                "Failed to find awesome person with id {}",
+                awesome_id
+            ));
         }
         let max_words_in_phrase = ap.unwrap().max_learning_words;
 
         // TODO limit the number of results returned by the db, perhaps with a MV.
-        let study_set = self.vocab_study_repo.get_study_set(awesome_id, max_words_in_phrase)?;
+        let study_set = self
+            .vocab_study_repo
+            .get_study_set(awesome_id, max_words_in_phrase)?;
 
         // Separate tuples into two groups for prioritization.
         let (mut target_group, secondary_group): (Vec<_>, Vec<_>) = study_set
@@ -617,11 +627,13 @@ impl LearnVocab for VocabFuzzyMatch {
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests in this module.
-    fn get_awesome_person_by_code(&self, look_up_code: String) -> Result<Option<AwesomePerson>, String> {
+    fn get_awesome_person_by_code(
+        &self,
+        look_up_code: String,
+    ) -> Result<Option<AwesomePerson>, String> {
         let awesome_person = self
             .awesome_person_repo
-            .get_awesome_person_by_code(look_up_code)
-            .map_err(|e| e.to_string())?;
+            .get_awesome_person_by_code(look_up_code)?;
 
         // Keep sec matters private
         let pub_awesome_person = AwesomePerson {
@@ -639,13 +651,9 @@ impl LearnVocab for VocabFuzzyMatch {
     fn get_vocab_stats(&self, vocab_study_id: i32) -> Result<(VocabStudy, Vocab), String> {
         let vocab_study = self
             .vocab_study_repo
-            .get_vocab_study_by_id(vocab_study_id)
-            .map_err(|e| e.to_string())?;
+            .get_vocab_study_by_id(vocab_study_id)?;
 
-        let vocab = self
-            .vocab_repo
-            .get_vocab_by_id(vocab_study.vocab_id)
-            .map_err(|e| e.to_string())?;
+        let vocab = self.vocab_repo.get_vocab_by_id(vocab_study.vocab_id)?;
 
         Ok((vocab_study, vocab))
     }

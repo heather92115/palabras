@@ -1,10 +1,9 @@
-use crate::dal::db_connection::get_connection;
+use crate::dal::db_connection::{error_to_string, get_connection};
 use crate::models::{NewVocab, Vocab};
 use crate::schema::palabras::vocab::dsl::vocab;
 use crate::schema::palabras::vocab::dsl::*;
 use diesel::prelude::*;
-use diesel::result::Error as DieselError;
-use diesel::{RunQueryDsl};
+use diesel::RunQueryDsl;
 
 /// The data mapping layer. Diesel is used to query and update vocabs.
 /// Connections are pulled from a static singleton pool for each operation.
@@ -24,9 +23,9 @@ pub trait VocabRepository: Send + Sync {
     /// # Returns
     ///
     /// Returns `Ok(Vocab)` if a vocab with the specified `vocab_id` exists,
-    /// or a `DieselError` if the query fails (e.g., due to connection issues or if no
+    /// or a `String` if the query fails (e.g., due to connection issues or if no
     /// vocab matches the given `vocab_id`).
-    fn get_vocab_by_id(&self, vocab_id: i32) -> Result<Vocab, DieselError>;
+    fn get_vocab_by_id(&self, vocab_id: i32) -> Result<Vocab, String>;
 
     /// Looks up a single vocab by the learning language.
     ///
@@ -45,7 +44,7 @@ pub trait VocabRepository: Send + Sync {
     fn find_vocab_by_learning_language(
         &self,
         learning_lang_search: String,
-    ) -> Result<Option<Vocab>, DieselError>;
+    ) -> Result<Option<Vocab>, String>;
 
     /// Looks up a single vocab by the searching alternatives.
     ///
@@ -64,7 +63,7 @@ pub trait VocabRepository: Send + Sync {
     fn find_vocab_by_alternative(
         &self,
         alternative_search: String,
-    ) -> Result<Option<Vocab>, DieselError>;
+    ) -> Result<Option<Vocab>, String>;
 
     /// Retrieves a list of `Vocab` records where the `first_lang` fields are empty.
     ///
@@ -111,10 +110,7 @@ pub trait VocabRepository: Send + Sync {
     /// Returns an error if there's an issue performing the insert operation, including connection problems
     /// or violations of database constraints (e.g., unique constraints). The error is returned as a `String`
     /// describing the failure.
-    fn create_vocab(
-        &self,
-        new_vocab: &NewVocab,
-    ) -> Result<Vocab, String>;
+    fn create_vocab(&self, new_vocab: &NewVocab) -> Result<Vocab, String>;
 
     /// Updates an existing `Vocab` record in the database.
     ///
@@ -151,9 +147,12 @@ impl VocabRepository for DbVocabRepository {
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn get_vocab_by_id(&self, vocab_id: i32) -> Result<Vocab, DieselError> {
-        let mut conn = get_connection();
-        vocab.find(vocab_id).first(&mut conn)
+    fn get_vocab_by_id(&self, vocab_id: i32) -> Result<Vocab, String> {
+        let mut conn = get_connection()?;
+        vocab
+            .find(vocab_id)
+            .first(&mut conn)
+            .map_err(|err| error_to_string(err))
     }
 
     /// Implementation, see trait for details [`VocabRepository::find_vocab_by_learning_language`]
@@ -163,12 +162,13 @@ impl VocabRepository for DbVocabRepository {
     fn find_vocab_by_learning_language(
         &self,
         learning_lang_search: String,
-    ) -> Result<Option<Vocab>, DieselError> {
-        let mut conn = get_connection();
+    ) -> Result<Option<Vocab>, String> {
+        let mut conn = get_connection()?;
         vocab
             .filter(learning_lang.eq(learning_lang_search))
             .first(&mut conn)
             .optional()
+            .map_err(|err| error_to_string(err))
     }
 
     /// Implementation, see trait for details [`VocabRepository::find_vocab_by_alternative`]
@@ -178,14 +178,15 @@ impl VocabRepository for DbVocabRepository {
     fn find_vocab_by_alternative(
         &self,
         alternative_search: String,
-    ) -> Result<Option<Vocab>, DieselError> {
-        let mut conn = get_connection();
+    ) -> Result<Option<Vocab>, String> {
+        let mut conn = get_connection()?;
 
         let like_pattern = format!("%{}%", alternative_search);
         vocab
             .filter(alternatives.ilike(like_pattern))
             .first(&mut conn)
             .optional()
+            .map_err(|err| error_to_string(err))
     }
 
     /// Implementation, see trait for details [`VocabRepository::get_empty_first_lang`]
@@ -193,7 +194,7 @@ impl VocabRepository for DbVocabRepository {
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
     fn get_empty_first_lang(&self, limit: i64) -> Result<Vec<Vocab>, String> {
-        let mut conn = get_connection();
+        let mut conn = get_connection()?;
         let vocabs = vocab
             .filter(first_lang.eq(""))
             .limit(limit)
@@ -207,11 +208,8 @@ impl VocabRepository for DbVocabRepository {
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn create_vocab(
-        &self,
-        new_vocab: &NewVocab,
-    ) -> Result<Vocab, String> {
-        let mut conn = get_connection();
+    fn create_vocab(&self, new_vocab: &NewVocab) -> Result<Vocab, String> {
+        let mut conn = get_connection()?;
         let inserted = diesel::insert_into(vocab)
             .values(new_vocab)
             .get_result(&mut conn)
@@ -225,7 +223,7 @@ impl VocabRepository for DbVocabRepository {
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
     fn update_vocab(&self, updating: Vocab) -> Result<usize, String> {
-        let mut conn = get_connection();
+        let mut conn = get_connection()?;
 
         let updated = diesel::update(vocab.find(updating.id))
             .set(&updating)

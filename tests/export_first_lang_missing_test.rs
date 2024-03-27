@@ -1,13 +1,19 @@
-use dotenv;
-use palabras::dal::db_connection::verify_connection_migrate_db;
+use dotenv::dotenv;
+use palabras::dal::db_connection::{establish_connection_pool, verify_connection_migrate_db};
 use palabras::sl::sync_vocab::export_missing_first_lang_pairs;
-use std::fs;
 use std::path::Path;
+use std::{env, fs};
+
+fn get_test_db_url() -> String {
+    env::var("TEST_DATABASE_URL").expect("env var TEST_DATABASE_URL was not found")
+}
 
 #[test]
 fn test_export_missing_first_lang_pairs() {
-    dotenv::from_filename("test.env").ok();
-    verify_connection_migrate_db();
+    dotenv().ok(); // Load environment variables from .env file
+
+    establish_connection_pool(get_test_db_url());
+    verify_connection_migrate_db().expect("connection and migration should have worked");
 
     let export_file = "tests/data/es_en_mapping/test_export.csv";
 
