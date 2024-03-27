@@ -1,4 +1,4 @@
-use tokio::signal;
+use crate::gql::studies::{MutationRoot, QueryRoot};
 use async_graphql::{http::GraphiQLSource, EmptySubscription, Schema};
 use async_graphql_axum::GraphQL;
 use axum::{
@@ -7,7 +7,7 @@ use axum::{
     Router,
 };
 use tokio::net::TcpListener;
-use crate::gql::studies::{QueryRoot, MutationRoot};
+use tokio::signal;
 
 /// Adds GraphiQL as a middleware for testing out queries and mutations.
 async fn graphiql() -> impl IntoResponse {
@@ -26,9 +26,7 @@ async fn graphiql() -> impl IntoResponse {
 /// * `listener` - A `TcpListener` that the server will accept connections on.
 ///
 pub async fn start_axum(listener: TcpListener) {
-
-    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
-        .finish();
+    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
 
     let app = Router::new().route("/gql", get(graphiql).post_service(GraphQL::new(schema)));
 
@@ -52,7 +50,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(unix)]
-        let terminate = async {
+    let terminate = async {
         signal::unix::signal(signal::unix::SignalKind::terminate())
             .expect("failed to install signal handler")
             .recv()
@@ -60,7 +58,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(not(unix))]
-        let terminate = std::future::pending::<()>();
+    let terminate = std::future::pending::<()>();
 
     tokio::select! {
         _ = ctrl_c => {},

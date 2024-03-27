@@ -159,7 +159,7 @@ impl Default for VocabStudy {
             id: Default::default(),
             vocab_id: Default::default(),
             awesome_person_id: Default::default(),
-            created: Utc::now(),               // Set a default creation time
+            created: Utc::now(), // Set a default creation time
             percentage_correct: Default::default(),
             last_change: None,
             last_tested: Default::default(),
@@ -189,7 +189,6 @@ pub struct NewVocabStudy {
     pub user_notes: Option<String>,
     pub correct_attempts: Option<i32>,
 }
-
 
 /// Represents an awesome person (user) in the language learning application, tracking their progress and personal details.
 ///
@@ -303,5 +302,5 @@ impl Default for NewAwesomePerson {
 /// the learning experience to the user's performance and progress.
 pub struct StudySet {
     pub vocab: Vocab,
-    pub vocab_study: VocabStudy
+    pub vocab_study: VocabStudy,
 }

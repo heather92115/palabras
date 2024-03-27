@@ -1,10 +1,10 @@
 use dotenv::dotenv;
-use palabras::dal::db_connection::verify_connection_migrate_db;
+use palabras::aws::glue::find_the_database;
+use palabras::dal::db_connection::{establish_connection_pool, verify_connection_migrate_db};
 use palabras::sl::fuzzy_match_vocab::{LearnVocab, VocabFuzzyMatch};
 use std::error::Error;
-use std::{env, io};
 use std::io::Write;
-
+use std::{env, io};
 
 /// Entry point for the Vocab Learning CLI application.
 ///
@@ -14,9 +14,7 @@ use std::io::Write;
 /// study progress based on the user's guesses.
 ///
 /// # Environment
-///
-/// Requires an environment variable `PALABRA_DATABASE_URL` to specify the database connection URL.
-/// The `.env` file is used to load environment variables.
+/// See the documentation of [`main`].
 ///
 /// # Behavior
 ///
@@ -31,23 +29,18 @@ use std::io::Write;
 /// This function returns an `Err` if any step of the process fails, including database connection
 /// issues, reading from stdin, or any other internal error.
 ///
-///
-/// To run the application, ensure that you have a `.env` file with the `PALABRA_DATABASE_URL`
-/// defined, and then execute the binary. The application will guide you through learning sessions
-/// based on your progress.
-///
 /// Change the awesome_person_id from it default of 1 with the only argument.
 ///
 /// ```sh
 /// cargo run --bin shell_study 1
 /// }
 /// ```
-pub fn main() -> Result<(), Box<dyn Error>> {
-
-    // Returning the PROD database URL defined in the env var: PALABRA_DATABASE_URL
+#[tokio::main]
+pub async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok(); // Load environment variables from .env file
-
-    verify_connection_migrate_db();
+    let db_url = find_the_database().await;
+    establish_connection_pool(db_url);
+    verify_connection_migrate_db()?;
 
     let args: Vec<String> = env::args().collect();
     let awesome_person_id = if args.len() < 2 {
@@ -60,18 +53,17 @@ pub fn main() -> Result<(), Box<dyn Error>> {
     let study_set = match_service.get_vocab_to_learn(awesome_person_id, 10)?;
     for (vocab_study, vocab) in study_set {
         println!();
-        println!("{}", match_service.determine_prompt(&vocab, &vocab_study.user_notes.unwrap_or_default()));
+        println!(
+            "{}",
+            match_service.determine_prompt(&vocab, &vocab_study.user_notes.unwrap_or_default())
+        );
 
         io::stdout().flush().unwrap(); // Ensure the prompt is displayed before reading input
         let mut guess = String::new(); // Create a mutable variable to store the input
 
         io::stdin().read_line(&mut guess)?;
 
-        let prompt = match_service.check_response(
-            vocab.id,
-            vocab_study.id,
-            guess,
-        )?;
+        let prompt = match_service.check_response(vocab.id, vocab_study.id, guess)?;
 
         println!("{}", &prompt);
     }

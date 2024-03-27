@@ -1,7 +1,5 @@
 use palabras::config::TranslationsConfig;
-use palabras::dal::file_access::{
-    find_first_lang_translations,
-};
+use palabras::dal::file_access::find_first_lang_translations;
 
 #[test]
 fn test_csv_parsing_with_commas() {

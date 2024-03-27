@@ -1,4 +1,4 @@
-use async_graphql::{Schema, EmptySubscription};
+use async_graphql::{EmptySubscription, Schema};
 use palabras::gql::studies::{MutationRoot, QueryRoot};
 
 // Assuming you have defined your QueryRoot and other types
@@ -15,5 +15,8 @@ async fn export_schema() -> async_graphql::Result<()> {
 }
 
 fn main() {
-    tokio::runtime::Runtime::new().unwrap().block_on(export_schema()).unwrap();
+    tokio::runtime::Runtime::new()
+        .unwrap()
+        .block_on(export_schema())
+        .unwrap();
 }

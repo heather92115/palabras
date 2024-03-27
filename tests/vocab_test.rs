@@ -1,17 +1,23 @@
-use dotenv;
-use palabras::dal::db_connection::verify_connection_migrate_db;
+use dotenv::dotenv;
+use palabras::dal::db_connection::{establish_connection_pool, verify_connection_migrate_db};
 use palabras::dal::vocab::{DbVocabRepository, VocabRepository};
 use palabras::models::{NewVocab, Vocab};
 use rand::Rng;
+use std::env;
 use std::string::ToString;
 
 pub static INTEGRATION_TEST_SKILL: &str = "integration test";
 
+fn get_test_db_url() -> String {
+    env::var("TEST_DATABASE_URL").expect("env var TEST_DATABASE_URL was not found")
+}
+
 #[test]
 fn test_create_translation() {
-    dotenv::from_filename("test.env").ok();
+    dotenv().ok(); // Load environment variables from .env file
 
-    verify_connection_migrate_db();
+    establish_connection_pool(get_test_db_url());
+    verify_connection_migrate_db().expect("connection and migration should have worked");
     let repo = DbVocabRepository;
 
     let new_vocab = test_new_vocab_instance();
@@ -48,11 +54,13 @@ fn test_create_translation() {
             alternatives
         );
 
-        assert_eq!(by_learning_lang.learning_lang_code,
-                   updating.learning_lang_code,
-                   "learning_lang_code expected {}, actual{}",
-                   updating.learning_lang_code.clone(),
-                   created.learning_lang_code.clone());
+        assert_eq!(
+            by_learning_lang.learning_lang_code,
+            updating.learning_lang_code,
+            "learning_lang_code expected {}, actual{}",
+            updating.learning_lang_code.clone(),
+            created.learning_lang_code.clone()
+        );
 
         alternatives.clone().split(',').for_each(|alt| {
             let by_an_alternative = repo
@@ -74,8 +82,8 @@ fn test_create_translation() {
 #[test]
 fn test_fix_first_lang() {
     dotenv::from_filename("test.env").ok();
-
-    verify_connection_migrate_db();
+    establish_connection_pool(get_test_db_url());
+    verify_connection_migrate_db().expect("connection and migration should have worked");
     let repo = DbVocabRepository;
     let num_records = 3;
 

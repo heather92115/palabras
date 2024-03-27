@@ -10,6 +10,8 @@ default-run = "palabras"
 [dependencies]
 async-graphql = "7.0"
 async-graphql-axum = "7.0"
+aws-config = "1.1"
+aws-sdk-secretsmanager = "1.20"
 axum = { version = "0.7", features = ["tracing", "ws"] }
 chrono = "0.4"
 diesel = { version = "2.1", features = ["postgres", "r2d2", "chrono", "serde_json"] }

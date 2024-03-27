@@ -1,5 +1,6 @@
 use dotenv::dotenv;
-use palabras::dal::db_connection::verify_connection_migrate_db;
+use palabras::aws::glue::find_the_database;
+use palabras::dal::db_connection::{establish_connection_pool, verify_connection_migrate_db};
 use palabras::gql::router::start_axum;
 use std::error::Error;
 use std::net::SocketAddr;
@@ -9,26 +10,28 @@ use tokio::net::TcpListener;
 ///
 /// This program initializes the database connection, sets up routing for GraphQL queries,
 /// and starts an HTTP server to listen for requests. The server's listening address and port
-/// are configured through the `SERVER_ADDR` environment variable. Otherwise, it defaults to `127.0.0.1:3000`.
+/// are configured through the `PAL_SERVER_ADDR` environment variable. Otherwise, it defaults to `127.0.0.1:3000`.
 /// The database connection is established based on the `PALABRA_DATABASE_URL`
 /// environment variable.
 ///
 /// # Environment Variables
 ///
-/// - `PALABRA_DATABASE_URL`: Specifies the database URL for connecting to the PostgreSQL database.
-///   It must be set in the `.env` file or the environment.
+/// - `PAL_DB_LINK`: The link used to get the database connection info.
+/// - `PAL_REGION`: Region where the database connection info is expected to be located.
+/// - `PAL_DATABASE_URL`: Specifies the fallback database URL for connecting to the PostgreSQL database.
+///   If neither of the former env vars are set, this will attempt to be used.
 ///
-/// - `SERVER_ADDR`: Defines the IP address and port where the server will listen for incoming HTTP requests.
+///
+/// - `PAL_SERVER_ADDR`: Defines the IP address and port where the server will listen for incoming HTTP requests.
 ///   The format should be `IP:PORT`, e.g., `127.0.0.1:3000`.
 ///
 /// # Panics
 ///
 /// The function will panic if:
 ///
-/// - The `PALABRA_DATABASE_URL` environment variable is not set or fails to
-///   connect to a database with the schema `palabras` Read the docs for detailed instructions.
+/// - The there is no method available to connect to the database.
 ///
-/// - The `SERVER_ADDR`  cannot be parsed as a `SocketAddr`.
+/// - The `PAL_SERVER_ADDR`  cannot be parsed as a `SocketAddr`.
 ///
 /// - The TCP listener fails to bind to the specified address.
 ///
@@ -37,11 +40,11 @@ use tokio::net::TcpListener;
 /// Ensure you have set the required environment variables in your `.env` file:
 ///
 /// ```plaintext
-/// PALABRA_DATABASE_URL=postgres://rustacean:password@0.0.0.0/postgres
-/// SERVER_ADDR=0.0.0.0:3000
+/// PAL_DATABASE_URL=postgres://rustacean:password@127.0.0.1/postgres
+/// PAL_SERVER_ADDR=127.0.0.1:3000
 /// ```
 ///
-/// Run the server with `cargo run`, and it will start listening on the specified `SERVER_ADDR`.
+/// Run the server with `cargo run`, and it will start listening on the specified `PAL_SERVER_ADDR`.
 ///
 /// # Errors
 ///
@@ -53,10 +56,12 @@ pub async fn main() -> Result<(), Box<dyn Error>> {
     // Returning the PROD database URL defined in the env var: PALABRA_DATABASE_URL
     dotenv().ok(); // Load environment variables from .env file
 
-    verify_connection_migrate_db();
+    let db_url = find_the_database().await;
+    establish_connection_pool(db_url);
+    verify_connection_migrate_db()?;
 
-    // Get the server address from the `SERVER_ADDR` environment variable
-    let env_server_addr = std::env::var("SERVER_ADDR").unwrap_or_default();
+    // Get the server address from the `PAL_SERVER_ADDR` environment variable
+    let env_server_addr = std::env::var("PAL_SERVER_ADDR").unwrap_or_default();
     let server_addr = if env_server_addr.is_empty() {
         "0.0.0.0:3000".to_string()
     } else {

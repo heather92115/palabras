@@ -122,7 +122,6 @@ pub struct AwesomeProfile {
     pub smallest_vocab: i32,
 }
 
-
 #[Object]
 impl AwesomeProfile {
     async fn id(&self) -> i32 {

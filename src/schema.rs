@@ -52,9 +52,5 @@ pub mod palabras {
     diesel::joinable!(vocab_study -> awesome_person (awesome_person_id));
     diesel::joinable!(vocab_study -> vocab (vocab_id));
 
-    diesel::allow_tables_to_appear_in_same_query!(
-        awesome_person,
-        vocab,
-        vocab_study,
-    );
+    diesel::allow_tables_to_appear_in_same_query!(awesome_person, vocab, vocab_study,);
 }

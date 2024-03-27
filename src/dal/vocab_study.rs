@@ -1,13 +1,12 @@
-use crate::dal::db_connection::get_connection;
+use crate::dal::db_connection::{error_to_string, get_connection};
 use crate::models::{NewVocabStudy, Vocab, VocabStudy};
+use crate::schema::palabras::vocab::dsl::vocab;
 use crate::schema::palabras::vocab_study::dsl::vocab_study;
 use crate::schema::palabras::vocab_study::dsl::*;
-use crate::schema::palabras::vocab::dsl::vocab;
 
-use diesel::prelude::*;
-use diesel::result::Error as DieselError;
-use diesel::{RunQueryDsl};
 use crate::schema::palabras::vocab::num_learning_words;
+use diesel::prelude::*;
+use diesel::RunQueryDsl;
 
 /// The data mapping layer. Diesel is used to query and update vocab study.
 /// Connections are pulled from a static singleton pool for each operation.
@@ -27,9 +26,9 @@ pub trait VocabStudyRepository: Send + Sync {
     /// # Returns
     ///
     /// Returns `Ok(VocabStudy)` if a vocab study with the specified `vocab_study_id` exists,
-    /// or a `DieselError` if the query fails (e.g., due to connection issues or if no
+    /// or a `String` if the query fails (e.g., due to connection issues or if no
     /// record matches the given `vocab_study_id`).
-    fn get_vocab_study_by_id(&self, vocab_study_id: i32) -> Result<VocabStudy, DieselError>;
+    fn get_vocab_study_by_id(&self, vocab_study_id: i32) -> Result<VocabStudy, String>;
 
     ///
     /// Gets a single vocab study using its two foreign references
@@ -42,10 +41,13 @@ pub trait VocabStudyRepository: Send + Sync {
     /// # Returns
     ///
     /// Returns `Ok(VocabStudy)` if a vocab study with the specified ids exists,
-    /// or a `DieselError` if the query fails (e.g., due to connection issues or if no
+    /// or a `String` if the query fails (e.g., due to connection issues or if no
     /// record matches the given `vocab_study_id`).
-    fn get_vocab_study_by_foreign_refs(&self, v_id: i32, ap_id:  i32) -> Result<Option<VocabStudy>, DieselError>;
-
+    fn get_vocab_study_by_foreign_refs(
+        &self,
+        v_id: i32,
+        ap_id: i32,
+    ) -> Result<Option<VocabStudy>, String>;
 
     /// Retrieves a study set of vocabulary pairs for a specified awesome person.
     ///
@@ -73,7 +75,8 @@ pub trait VocabStudyRepository: Send + Sync {
     /// This function will return an error if:
     /// - There is a problem connecting to the database.
     /// - The SQL query fails to execute properly.
-    fn get_study_set(&self, ap_id: i32, max_words: i32) -> Result<Vec<(VocabStudy, Vocab)>, String>;
+    fn get_study_set(&self, ap_id: i32, max_words: i32)
+        -> Result<Vec<(VocabStudy, Vocab)>, String>;
 
     /// Inserts a new `VocabStudy` record into the database.
     ///
@@ -98,10 +101,7 @@ pub trait VocabStudyRepository: Send + Sync {
     /// or violations of database constraints (e.g., unique constraints, foreign key constraints).
     /// The error is returned as a `String`
     /// describing the failure.
-    fn create_vocab_study(
-        &self,
-        new_vocab_study: &NewVocabStudy,
-    ) -> Result<VocabStudy, String>;
+    fn create_vocab_study(&self, new_vocab_study: &NewVocabStudy) -> Result<VocabStudy, String>;
 
     /// Updates an existing `VocabStudy` record in the database.
     ///
@@ -138,37 +138,49 @@ impl VocabStudyRepository for DbVocabStudyRepository {
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn get_vocab_study_by_id(&self, vocab_study_id: i32) -> Result<VocabStudy, DieselError> {
-        let mut conn = get_connection();
-        vocab_study.find(vocab_study_id).first(&mut conn)
+    fn get_vocab_study_by_id(&self, vocab_study_id: i32) -> Result<VocabStudy, String> {
+        let mut conn = get_connection()?;
+        vocab_study
+            .find(vocab_study_id)
+            .first(&mut conn)
+            .map_err(|err| error_to_string(err))
     }
 
     /// Implementation, see trait for details [`VocabStudyRepository::get_vocab_study_by_foreign_refs`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn get_vocab_study_by_foreign_refs(&self, v_id: i32, ap_id:  i32) -> Result<Option<VocabStudy>, DieselError> {
-        let mut conn = get_connection();
+    fn get_vocab_study_by_foreign_refs(
+        &self,
+        v_id: i32,
+        ap_id: i32,
+    ) -> Result<Option<VocabStudy>, String> {
+        let mut conn = get_connection()?;
 
         vocab_study
             .filter(vocab_id.eq(v_id).and(awesome_person_id.eq(ap_id)))
             .first(&mut conn)
             .optional()
+            .map_err(|err| error_to_string(err))
     }
 
     /// Implementation, see trait for details [`VocabStudyRepository::get_study_set`]
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn get_study_set(&self, ap_id: i32, max_words: i32) -> Result<Vec<(VocabStudy, Vocab)>, String> {
-        let mut conn = get_connection();
+    fn get_study_set(
+        &self,
+        ap_id: i32,
+        max_words: i32,
+    ) -> Result<Vec<(VocabStudy, Vocab)>, String> {
+        let mut conn = get_connection()?;
 
         let results = vocab_study
             .inner_join(vocab)
             .filter(awesome_person_id.eq(ap_id))
             .filter(num_learning_words.le(max_words))
             .load::<(VocabStudy, Vocab)>(&mut conn)
-            .map_err(|err| err.to_string())?;
+            .map_err(|err| error_to_string(err))?;
 
         Ok(results)
     }
@@ -177,15 +189,12 @@ impl VocabStudyRepository for DbVocabStudyRepository {
     ///
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
-    fn create_vocab_study(
-        &self,
-        new_vocab_study: &NewVocabStudy,
-    ) -> Result<VocabStudy, String> {
-        let mut conn = get_connection();
+    fn create_vocab_study(&self, new_vocab_study: &NewVocabStudy) -> Result<VocabStudy, String> {
+        let mut conn = get_connection()?;
         let inserted = diesel::insert_into(vocab_study)
             .values(new_vocab_study)
             .get_result(&mut conn)
-            .map_err(|err| err.to_string())?;
+            .map_err(|err| error_to_string(err))?;
 
         Ok(inserted)
     }
@@ -195,10 +204,12 @@ impl VocabStudyRepository for DbVocabStudyRepository {
     /// For advanced usage and mock implementations, please refer to
     /// the integration tests for this module.
     fn update_vocab_study(&self, updating: VocabStudy) -> Result<usize, String> {
-        let mut conn = get_connection();
+        let mut conn = get_connection()?;
 
         let updated = diesel::update(vocab_study.find(updating.id))
-            .set(&updating).execute(&mut conn).map_err(|e| e.to_string())?;
+            .set(&updating)
+            .execute(&mut conn)
+            .map_err(|e| e.to_string())?;
 
         Ok(updated)
     }
