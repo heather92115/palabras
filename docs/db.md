@@ -52,7 +52,7 @@ GRANT ALL PRIVILEGES ON SCHEMA palabras TO tester;
 ALTER ROLE tester SET search_path TO palabras;
 ```
 
-## Step 3: Create a test.env file with the DB URL
+## Step 3: Add the test env var to .env file with the DB URL
 ```zsh
 echo "export PAL_TEST_DATABASE_URL='postgres://tester:************@0.0.0.0:5433/palabras'" >> .env
 ```
